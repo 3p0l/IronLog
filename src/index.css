@@ -1,0 +1,319 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+:root {
+  --mono-black: #000000;
+  --mono-obsidian: #0A0A0A;
+  --mono-elevated-dark: #141414;
+  --mono-dark-border: #262626;
+  --mono-white: #FFFFFF;
+  --mono-subtle-light: #F5F5F5;
+  --mono-light-border: #E5E5E5;
+  --mono-muted: #737373;
+  --ease-mech: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-press: 90ms;
+  --dur-polarity: 180ms;
+  --dur-view: 220ms;
+  --dur-panel: 240ms;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    -webkit-tap-highlight-color: transparent;
+    background-color: #FFFFFF;
+    color: #000000;
+  }
+
+  .dark {
+    color-scheme: dark;
+    background-color: #000000;
+    color: #FFFFFF;
+  }
+
+  button,
+  a,
+  select,
+  input,
+  textarea {
+    transition-timing-function: var(--ease-mech);
+  }
+
+  /* Crisp hairline scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #D4D4D4;
+    border-radius: 0px;
+  }
+
+  .dark ::-webkit-scrollbar-thumb {
+    background: #262626;
+  }
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Precision mechanical press + polarity interaction */
+.mech-press {
+  transition-property: color, background-color, border-color, opacity, transform;
+  transition-duration: 180ms;
+  transition-timing-function: var(--ease-mech);
+}
+
+.mech-press:active:not(:disabled) {
+  transform: scale(0.98);
+  transition-duration: 90ms;
+}
+
+/* Monochrome textures (zero color, zero blur) */
+.hud-hatch {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0px,
+    transparent 4px,
+    rgba(0, 0, 0, 0.055) 4px,
+    rgba(0, 0, 0, 0.055) 5px
+  );
+}
+
+.dark .hud-hatch {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    transparent 0px,
+    transparent 4px,
+    rgba(255, 255, 255, 0.07) 4px,
+    rgba(255, 255, 255, 0.07) 5px
+  );
+}
+
+.hud-hatch-strong {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    #000000 0px,
+    #000000 3px,
+    #FFFFFF 3px,
+    #FFFFFF 6px
+  );
+}
+
+.dark .hud-hatch-strong {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    #FFFFFF 0px,
+    #FFFFFF 3px,
+    #000000 3px,
+    #000000 6px
+  );
+}
+
+.hud-dot-matrix {
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.14) 1px, transparent 1px);
+  background-size: 8px 8px;
+}
+
+.dark .hud-dot-matrix {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.16) 1px, transparent 1px);
+  background-size: 8px 8px;
+}
+
+.hud-scrim {
+  background-color: rgba(255, 255, 255, 0.82);
+  background-image: radial-gradient(circle, rgba(0, 0, 0, 0.22) 1px, transparent 1px);
+  background-size: 6px 6px;
+}
+
+.dark .hud-scrim {
+  background-color: rgba(0, 0, 0, 0.84);
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.18) 1px, transparent 1px);
+  background-size: 6px 6px;
+}
+
+/* Micro-tick ruler scale */
+.hud-ruler {
+  background-image: repeating-linear-gradient(
+    to right,
+    currentColor 0px,
+    currentColor 1px,
+    transparent 1px,
+    transparent 8px
+  );
+}
+
+/* Corner registration ticks (L-bracket reticle corners) */
+.hud-frame {
+  position: relative;
+}
+
+.hud-frame::before,
+.hud-frame::after {
+  content: "";
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  pointer-events: none;
+}
+
+.hud-frame::before {
+  top: -1px;
+  left: -1px;
+  border-top: 2px solid currentColor;
+  border-left: 2px solid currentColor;
+}
+
+.hud-frame::after {
+  bottom: -1px;
+  right: -1px;
+  border-bottom: 2px solid currentColor;
+  border-right: 2px solid currentColor;
+}
+
+/* Inset reticle ticks on pitch-black inverted modules so outer corners stay razor-square */
+.hud-frame[class*="bg-[#000000]"]::before {
+  top: 4px;
+  left: 4px;
+  width: 6px;
+  height: 6px;
+  border-top: 1.5px solid rgba(255, 255, 255, 0.75);
+  border-left: 1.5px solid rgba(255, 255, 255, 0.75);
+}
+
+.hud-frame[class*="bg-[#000000]"]::after {
+  bottom: 4px;
+  right: 4px;
+  width: 6px;
+  height: 6px;
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.75);
+  border-right: 1.5px solid rgba(255, 255, 255, 0.75);
+}
+
+/* Double-bordered Swiss PR stamp */
+.hud-pr-stamp {
+  outline: 1px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* Mechanical View, Modal & Panel Transitions */
+@keyframes hudViewSettle {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hudModalShutter {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hudScrimFade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes hudExpandIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hud-view-enter {
+  animation: hudViewSettle 220ms var(--ease-mech) both;
+}
+
+.hud-modal-enter {
+  animation: hudModalShutter 240ms var(--ease-mech) both;
+}
+
+.hud-scrim-enter {
+  animation: hudScrimFade 180ms var(--ease-mech) both;
+}
+
+.hud-expand-enter {
+  animation: hudExpandIn 240ms var(--ease-mech) both;
+}
+
+/* Accordion smooth height container */
+.hud-accordion {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 240ms var(--ease-mech), opacity 200ms var(--ease-mech);
+  opacity: 0;
+}
+
+.hud-accordion[data-open="true"] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.hud-accordion > div {
+  overflow: hidden;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mech-press,
+  .hud-view-enter,
+  .hud-modal-enter,
+  .hud-scrim-enter,
+  .hud-expand-enter,
+  .hud-accordion {
+    animation-duration: 90ms !important;
+    transition-duration: 90ms !important;
+  }
+
+  .mech-press:active:not(:disabled) {
+    transform: none;
+  }
+
+  @keyframes hudViewSettle {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes hudModalShutter {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes hudExpandIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}

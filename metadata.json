@@ -1,0 +1,6 @@
+{
+  "name": "IronLog — Offline Workout Tracker",
+  "description": "Local-first strength training logger, unlimited routines, exercise analytics, body measurements, and Hevy CSV migration with zero accounts or paywalls.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
