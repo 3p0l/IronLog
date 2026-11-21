@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Award, Clock, Dumbbell, Layers, X } from 'lucide-react';
+import { Award, CheckCircle2, Clock, Dumbbell, Layers, X } from 'lucide-react';
 import { PRRecord, WorkoutSession } from '../types/workout';
 import { useWorkout } from '../context/WorkoutContext';
 import {
@@ -49,9 +49,9 @@ export function WorkoutSummaryModal({
   const totalSets = calculateWorkoutCompletedSets(session);
 
   const prTypeLabel = (type: PRRecord['type']): string => {
-    if (type === 'weight') return 'Heaviest Weight';
+    if (type === 'weight') return 'Heaviest weight';
     if (type === '1rm') return 'Best Est. 1RM';
-    return 'Best Set Volume';
+    return 'Best set volume';
   };
 
   const formatPrValue = (pr: PRRecord): string => {
@@ -61,38 +61,43 @@ export function WorkoutSummaryModal({
 
   return (
     <div
-      className="hud-scrim hud-scrim-enter fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4"
+      className="matte-scrim scrim-enter fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4"
       role="dialog"
       aria-modal="true"
       aria-label="Workout completion summary"
     >
-      <div className="hud-modal-enter hud-frame flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-[2px] border-2 border-[#000000] dark:border-[#FFFFFF] bg-[#FFFFFF] dark:bg-[#0A0A0A]">
-        {/* Inverted Pitch-Black Header */}
-        <div className="flex items-center justify-between border-b border-[#262626] bg-[#000000] px-5 py-4 text-[#FFFFFF]">
-          <div>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-[#FFFFFF]">
-              ■ SESSION COMPLETE // TELEMETRY COMMIT
-            </p>
-            <h2 className="mt-0.5 text-base font-bold tracking-tight text-[#FFFFFF]">
-              Workout Summary
-            </h2>
+      <div className="matte-modal modal-enter flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-[var(--border-hairline)] px-5 py-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-[var(--accent-sage-border)] bg-[var(--accent-sage-tint)] text-[var(--accent-sage)]">
+              <CheckCircle2 className="h-4 w-4 stroke-[1.5]" />
+            </div>
+            <div>
+              <h2 className="text-base font-semibold tracking-[-0.01em] text-[var(--ink-primary)]">
+                Workout summary
+              </h2>
+              <p className="text-xs text-[var(--ink-secondary)]">
+                Review and save session locally
+              </p>
+            </div>
           </div>
           <button
             type="button"
             onClick={onCancel}
             aria-label="Return to workout"
-            className="mech-press flex h-10 w-10 items-center justify-center rounded-[2px] border border-[#262626] bg-[#0A0A0A] text-[#FFFFFF] hover:border-[#FFFFFF]"
+            className="calm-press btn-ghost flex h-8 w-8 items-center justify-center"
           >
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4 stroke-[1.5]" />
           </button>
         </div>
 
         <div className="flex-1 space-y-5 overflow-y-auto p-5">
           <div>
-            <h3 className="text-xl font-bold tracking-tight text-[#000000] dark:text-[#FFFFFF]">
+            <h3 className="text-lg font-semibold tracking-[-0.02em] text-[var(--ink-primary)]">
               {session.title}
             </h3>
-            <p className="mt-0.5 font-mono text-[11px] uppercase tracking-wider text-[#737373]">
+            <p className="mt-1 text-xs text-[var(--ink-muted)]">
               {new Date(session.startedAt).toLocaleDateString('en-US', {
                 weekday: 'long',
                 month: 'short',
@@ -101,67 +106,74 @@ export function WorkoutSummaryModal({
             </p>
           </div>
 
-          {/* 3-Up Hairline Stat Grid */}
-          <div className="grid grid-cols-3 gap-px border border-[#000000] dark:border-[#262626] bg-[#E5E5E5] dark:bg-[#262626]">
-            <div className="bg-[#FFFFFF] dark:bg-[#0A0A0A] p-3">
-              <div className="flex items-center gap-1 font-mono text-[10px] font-semibold uppercase tracking-wider text-[#737373]">
-                <Clock className="h-3 w-3 text-[#000000] dark:text-[#FFFFFF]" />
+          {/* De-boxed 3-Up Stat Strip */}
+          <div className="grid grid-cols-3 divide-x divide-[var(--border-hairline)] border-y border-[var(--border-hairline)] py-4">
+            <div className="pr-3">
+              <div className="flex items-center gap-2 text-xs text-[var(--ink-secondary)]">
+                <Clock className="h-4 w-4 stroke-[1.5] text-[var(--ink-muted)]" />
                 <span>Duration</span>
               </div>
-              <p className="mt-1.5 font-mono text-sm font-bold tabular-nums text-[#000000] dark:text-[#FFFFFF]">
+              <p className="mt-2 font-mono text-sm font-semibold tabular-nums text-[var(--ink-primary)]">
                 {formatDuration(session.durationSeconds)}
               </p>
             </div>
-            <div className="bg-[#FFFFFF] dark:bg-[#0A0A0A] p-3">
-              <div className="flex items-center gap-1 font-mono text-[10px] font-semibold uppercase tracking-wider text-[#737373]">
-                <Dumbbell className="h-3 w-3 text-[#000000] dark:text-[#FFFFFF]" />
+            <div className="px-3">
+              <div className="flex items-center gap-2 text-xs text-[var(--ink-secondary)]">
+                <Dumbbell className="h-4 w-4 stroke-[1.5] text-[var(--ink-muted)]" />
                 <span>Volume</span>
               </div>
-              <p className="mt-1.5 font-mono text-sm font-bold tabular-nums text-[#000000] dark:text-[#FFFFFF]">
+              <p className="mt-2 font-mono text-sm font-semibold tabular-nums text-[var(--ink-primary)]">
                 {formatVolume(volumeKg, unit)}
               </p>
             </div>
-            <div className="bg-[#FFFFFF] dark:bg-[#0A0A0A] p-3">
-              <div className="flex items-center gap-1 font-mono text-[10px] font-semibold uppercase tracking-wider text-[#737373]">
-                <Layers className="h-3 w-3 text-[#000000] dark:text-[#FFFFFF]" />
+            <div className="pl-3">
+              <div className="flex items-center gap-2 text-xs text-[var(--ink-secondary)]">
+                <Layers className="h-4 w-4 stroke-[1.5] text-[var(--ink-muted)]" />
                 <span>Sets</span>
               </div>
-              <p className="mt-1.5 font-mono text-sm font-bold tabular-nums text-[#000000] dark:text-[#FFFFFF]">
+              <p className="mt-2 font-mono text-sm font-semibold tabular-nums text-[var(--ink-primary)]">
                 {totalSets}
               </p>
             </div>
           </div>
 
-          {/* Monochrome PR Ledger */}
+          {/* Personal Records (Sand Status Ticks) */}
           {prs.length > 0 && (
-            <div className="rounded-[2px] border-2 border-[#000000] dark:border-[#FFFFFF] bg-[#FFFFFF] dark:bg-[#0A0A0A] overflow-hidden">
-              <div className="flex items-center justify-between bg-[#000000] dark:bg-[#FFFFFF] px-4 py-2 text-[#FFFFFF] dark:text-[#000000]">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Award className="h-3.5 w-3.5" />
-                  <h4 className="font-mono text-[11px] font-bold uppercase tracking-[0.12em]">
-                    {prs.length} New Personal {prs.length === 1 ? 'Record' : 'Records'}
+                  <Award className="h-4 w-4 stroke-[1.5] text-[var(--accent-sand)]" />
+                  <h4 className="text-xs font-semibold text-[var(--ink-primary)]">
+                    {prs.length} new personal {prs.length === 1 ? 'record' : 'records'}
                   </h4>
                 </div>
-                <span className="font-mono text-[10px] font-bold uppercase tracking-widest">
-                  // PR ▲
+                <span className="pr-badge px-2 py-0.5 font-mono text-[11px] font-medium">
+                  PR
                 </span>
               </div>
-              <div className="divide-y divide-[#E5E5E5] dark:divide-[#262626] px-4">
+              <div className="divide-y divide-[var(--border-hairline)] rounded-lg border border-[var(--border-hairline)] bg-[var(--recessed)] px-3">
                 {prs.map((pr, idx) => (
                   <div
                     key={`${pr.exerciseId}-${pr.type}-${idx}`}
-                    className="flex items-center justify-between gap-2 py-2.5 text-xs"
+                    className="status-tick status-tick-sand flex items-center justify-between gap-2 py-3 pl-3 text-xs"
                   >
                     <div className="min-w-0">
-                      <p className="truncate font-bold text-[#000000] dark:text-[#FFFFFF]">
+                      <p className="truncate font-medium text-[var(--ink-primary)]">
                         {pr.exerciseName}
                       </p>
-                      <p className="font-mono text-[11px] text-[#737373]">
+                      <p className="mt-1 text-xs text-[var(--ink-secondary)]">
                         {prTypeLabel(pr.type)}
-                        {pr.weightKg && pr.reps ? ` · ${formatWeight(pr.weightKg, unit)} × ${pr.reps}` : ''}
+                        {pr.weightKg && pr.reps ? (
+                          <span className="font-mono tabular-nums">
+                            {' '}
+                            · {formatWeight(pr.weightKg, unit)} × {pr.reps}
+                          </span>
+                        ) : (
+                          ''
+                        )}
                       </p>
                     </div>
-                    <span className="hud-pr-stamp shrink-0 px-2 py-0.5 font-mono text-xs font-bold tabular-nums">
+                    <span className="pr-badge shrink-0 px-2 py-0.5 font-mono text-xs font-medium tabular-nums">
                       {formatPrValue(pr)}
                     </span>
                   </div>
@@ -172,19 +184,19 @@ export function WorkoutSummaryModal({
 
           {/* Update Routine Option */}
           {sourceRoutineName && routineModified && (
-            <label className="hud-hatch flex cursor-pointer items-start gap-3 rounded-[2px] border border-[#000000] dark:border-[#FFFFFF] p-3.5">
+            <label className="flex cursor-pointer items-start gap-3 rounded-lg border border-[var(--border-hairline)] bg-[var(--recessed)] p-4 transition-colors hover:border-[var(--border-focus)]">
               <input
                 type="checkbox"
                 checked={updateRoutine}
                 onChange={(e) => setUpdateRoutine(e.target.checked)}
-                className="mt-0.5 h-4 w-4 rounded-none accent-[#000000] dark:accent-[#FFFFFF]"
+                className="mt-0.5 h-4 w-4 rounded accent-[var(--accent-steel)]"
               />
-              <div className="text-xs leading-relaxed bg-[#FFFFFF]/90 dark:bg-[#0A0A0A]/90 px-2 py-1 border border-[#E5E5E5] dark:border-[#262626]">
-                <p className="font-bold text-[#000000] dark:text-[#FFFFFF]">
+              <div className="text-xs leading-relaxed">
+                <p className="font-semibold text-[var(--ink-primary)]">
                   Update &ldquo;{sourceRoutineName}&rdquo; routine
                 </p>
-                <p className="text-[#525252] dark:text-[#A3A3A3]">
-                  Save the modified exercises, set counts, and weights back to your routine template.
+                <p className="mt-1 text-[var(--ink-secondary)]">
+                  Save modified exercises, sets, and weights back to routine template
                 </p>
               </div>
             </label>
@@ -194,35 +206,35 @@ export function WorkoutSummaryModal({
           <div>
             <label
               htmlFor="summary-notes"
-              className="mb-1.5 block font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-[#525252] dark:text-[#A3A3A3]"
+              className="mb-2 block text-xs font-medium text-[var(--ink-secondary)]"
             >
-              Workout Notes
+              Workout notes
             </label>
             <textarea
               id="summary-notes"
               rows={2}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="How did this session feel?"
-              className="w-full rounded-[2px] border border-[#E5E5E5] dark:border-[#262626] bg-[#F5F5F5] dark:bg-[#141414] p-3 text-sm text-[#000000] dark:text-[#FFFFFF] placeholder-[#737373] focus:border-[#000000] dark:focus:border-[#FFFFFF] focus:outline-none"
+              placeholder="Session notes"
+              className="matte-input w-full bg-[var(--recessed)] p-3 text-sm"
             />
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5 border-t border-[#E5E5E5] dark:border-[#262626] bg-[#F5F5F5] dark:bg-[#000000] p-4">
+        <div className="flex items-center gap-3 border-t border-[var(--border-hairline)] p-4">
           <button
             type="button"
             onClick={onCancel}
-            className="mech-press min-h-[44px] flex-1 rounded-[2px] border border-[#000000] dark:border-[#FFFFFF] bg-[#FFFFFF] dark:bg-[#0A0A0A] font-mono text-xs font-bold uppercase tracking-wider text-[#000000] dark:text-[#FFFFFF] hover:bg-[#E5E5E5] dark:hover:bg-[#141414]"
+            className="calm-press btn-secondary h-10 flex-1 text-sm font-medium whitespace-nowrap"
           >
             Back
           </button>
           <button
             type="button"
             onClick={() => onConfirm(notes.trim(), updateRoutine)}
-            className="mech-press min-h-[44px] flex-[2] rounded-[2px] border border-[#000000] dark:border-[#FFFFFF] bg-[#000000] dark:bg-[#FFFFFF] font-mono text-xs font-bold uppercase tracking-widest text-[#FFFFFF] dark:text-[#000000] hover:bg-[#1A1A1A] dark:hover:bg-[#E5E5E5]"
+            className="calm-press btn-primary h-10 flex-[2] text-sm font-medium whitespace-nowrap"
           >
-            Save Workout
+            Save workout
           </button>
         </div>
       </div>

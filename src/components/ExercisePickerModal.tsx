@@ -59,29 +59,31 @@ export function ExercisePickerModal({
 
   return (
     <div
-      className="hud-scrim hud-scrim-enter fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4"
+      className="matte-scrim scrim-enter fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4"
       role="dialog"
       aria-modal="true"
       aria-label="Add exercises"
     >
-      <div className="hud-modal-enter hud-frame flex h-[88vh] w-full max-w-2xl flex-col overflow-hidden rounded-[2px] border-2 border-[#000000] dark:border-[#FFFFFF] bg-[#FFFFFF] dark:bg-[#0A0A0A] sm:h-[82vh]">
-        {/* Pitch-Black Header + Search Console */}
-        <div className="bg-[#000000] text-[#FFFFFF] border-b border-[#262626]">
-          <div className="flex items-center justify-between px-5 py-3.5 border-b border-[#262626]">
+      <div className="matte-modal modal-enter flex h-[88vh] w-full max-w-2xl flex-col overflow-hidden sm:h-[82vh]">
+        {/* Header + Search */}
+        <div className="border-b border-[var(--border-hairline)]">
+          <div className="flex items-center justify-between px-5 py-4">
             <div className="flex items-center gap-3">
               <div>
-                <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-[#A3A3A3]">
-                  SELECT // MOVEMENT INDEX ({filtered.length})
+                <h2 className="text-base font-semibold tracking-[-0.01em] text-[var(--ink-primary)]">
+                  Add exercises
+                </h2>
+                <p className="mt-1 text-xs text-[var(--ink-secondary)]">
+                  <span className="font-mono tabular-nums">{filtered.length}</span> movements
                 </p>
-                <h2 className="text-base font-bold tracking-tight text-[#FFFFFF]">Add Exercises</h2>
               </div>
               {onCreateCustomClick && (
                 <button
                   type="button"
                   onClick={onCreateCustomClick}
-                  className="mech-press inline-flex min-h-[34px] items-center gap-1 rounded-[2px] border border-[#FFFFFF] bg-[#000000] px-2.5 font-mono text-[11px] font-bold uppercase tracking-wider text-[#FFFFFF] hover:bg-[#FFFFFF] hover:text-[#000000] whitespace-nowrap"
+                  className="calm-press btn-secondary inline-flex h-8 items-center gap-1 px-3 text-xs font-medium whitespace-nowrap"
                 >
-                  <Plus className="h-3.5 w-3.5" />
+                  <Plus className="h-4 w-4 stroke-[1.5]" />
                   Custom
                 </button>
               )}
@@ -90,32 +92,34 @@ export function ExercisePickerModal({
               type="button"
               onClick={onClose}
               aria-label="Close exercise picker"
-              className="mech-press flex h-10 w-10 items-center justify-center rounded-[2px] border border-[#262626] bg-[#0A0A0A] text-[#FFFFFF] hover:border-[#FFFFFF]"
+              className="calm-press btn-ghost flex h-8 w-8 items-center justify-center"
             >
-              <X className="h-4 w-4" />
+              <X className="h-4 w-4 stroke-[1.5]" />
             </button>
           </div>
 
-          <div className="space-y-2.5 px-5 py-3.5 bg-[#0A0A0A]">
+          <div className="space-y-3 border-t border-[var(--border-hairline)] bg-[var(--recessed)] px-5 py-4">
             <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#737373]" />
+              <span className="pointer-events-none absolute left-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center text-[var(--ink-muted)]">
+                <Search className="h-4 w-4 stroke-[1.5]" />
+              </span>
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search 120+ exercises..."
+                placeholder="Search exercises"
                 aria-label="Search exercises"
-                className="h-10 w-full rounded-[2px] border border-[#262626] bg-[#000000] pl-9 pr-4 font-mono text-xs text-[#FFFFFF] placeholder-[#737373] focus:border-[#FFFFFF] focus:outline-none"
+                className="matte-input h-9 w-full pl-10 pr-4 text-sm"
               />
             </div>
-            <div className="grid grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-2 gap-3">
               <select
                 value={muscleFilter}
                 onChange={(e) => setMuscleFilter(e.target.value as MuscleGroup | 'ALL')}
                 aria-label="Filter by muscle group"
-                className="h-10 rounded-[2px] border border-[#262626] bg-[#000000] px-3 font-mono text-xs font-medium text-[#FFFFFF] focus:border-[#FFFFFF] focus:outline-none"
+                className="matte-input h-9 px-3 text-xs font-medium"
               >
-                <option value="ALL">All Muscles</option>
+                <option value="ALL">All muscles</option>
                 {ALL_MUSCLE_GROUPS.map((m) => (
                   <option key={m} value={m}>
                     {m}
@@ -126,9 +130,9 @@ export function ExercisePickerModal({
                 value={equipmentFilter}
                 onChange={(e) => setEquipmentFilter(e.target.value as EquipmentType | 'ALL')}
                 aria-label="Filter by equipment"
-                className="h-10 rounded-[2px] border border-[#262626] bg-[#000000] px-3 font-mono text-xs font-medium text-[#FFFFFF] focus:border-[#FFFFFF] focus:outline-none"
+                className="matte-input h-9 px-3 text-xs font-medium"
               >
-                <option value="ALL">All Equipment</option>
+                <option value="ALL">All equipment</option>
                 {ALL_EQUIPMENT_TYPES.map((eq) => (
                   <option key={eq} value={eq}>
                     {eq}
@@ -139,58 +143,49 @@ export function ExercisePickerModal({
           </div>
         </div>
 
-        {/* Hairline-Divided Exercise Directory */}
-        <div className="flex-1 overflow-y-auto divide-y divide-[#E5E5E5] dark:divide-[#262626]">
+        {/* Hairline-Divided Exercise List */}
+        <div className="flex-1 overflow-y-auto divide-y divide-[var(--border-hairline)]">
           {filtered.length === 0 ? (
-            <div className="hud-dot-matrix px-6 py-12 text-center">
-              <p className="inline-block bg-[#FFFFFF] dark:bg-[#0A0A0A] border border-[#E5E5E5] dark:border-[#262626] px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-[#737373]">
-                00 // No exercises match your filters
-              </p>
+            <div className="px-6 py-12 text-center">
+              <p className="text-sm text-[var(--ink-muted)]">No exercises match active filters</p>
             </div>
           ) : (
-            filtered.map((ex, idx) => {
+            filtered.map((ex) => {
               const isSelected = selectedIds.includes(ex.id);
               return (
                 <button
                   key={ex.id}
                   type="button"
                   onClick={() => toggleSelect(ex.id)}
-                  className={`flex min-h-[58px] w-full items-center justify-between gap-3 px-5 py-3 text-left transition-colors ${
+                  className={`flex min-h-[52px] w-full items-center justify-between gap-3 px-5 py-3 text-left transition-colors ${
                     isSelected
-                      ? 'bg-[#000000] text-[#FFFFFF] dark:bg-[#FFFFFF] dark:text-[#000000]'
-                      : 'bg-transparent text-[#000000] dark:text-[#FFFFFF] hover:bg-[#F5F5F5] dark:hover:bg-[#141414]'
+                      ? 'status-tick status-tick-sage bg-[var(--surface-hover)]/60'
+                      : 'bg-transparent hover:bg-[var(--surface-hover)]/40'
                   }`}
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <span
-                      className={`font-mono text-[10px] font-semibold tabular-nums shrink-0 ${
-                        isSelected ? 'text-[#A3A3A3] dark:text-[#525252]' : 'text-[#737373]'
-                      }`}
-                    >
-                      [{String(idx + 1).padStart(3, '0')}]
-                    </span>
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <p className="truncate text-sm font-medium text-[var(--ink-primary)]">
                         {ex.name}
                       </p>
-                      <p
-                        className={`mt-0.5 truncate font-mono text-[11px] uppercase tracking-wider ${
-                          isSelected ? 'text-[#D4D4D4] dark:text-[#525252]' : 'text-[#737373]'
-                        }`}
-                      >
-                        {ex.primaryMuscle} // {ex.equipment}
-                        {ex.isCustom ? ' // CUSTOM' : ''}
-                      </p>
+                      {ex.isCustom && (
+                        <span className="rounded-[6px] border border-[var(--border-hairline)] bg-[var(--recessed)] px-2 py-0.5 text-[11px] font-medium text-[var(--ink-secondary)]">
+                          Custom
+                        </span>
+                      )}
                     </div>
+                    <p className="mt-1 truncate text-xs text-[var(--ink-secondary)]">
+                      {ex.primaryMuscle} · {ex.equipment}
+                    </p>
                   </div>
                   <div
-                    className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-[2px] border transition-colors ${
+                    className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-[6px] border transition-colors ${
                       isSelected
-                        ? 'border-[#FFFFFF] bg-[#FFFFFF] text-[#000000] dark:border-[#000000] dark:bg-[#000000] dark:text-[#FFFFFF]'
-                        : 'border-[#000000] dark:border-[#525252]'
+                        ? 'border-[var(--accent-sage-border)] bg-[var(--accent-sage-tint)] text-[var(--accent-sage)]'
+                        : 'border-[var(--border-focus)] bg-transparent'
                     }`}
                   >
-                    {isSelected && <Check className="h-3.5 w-3.5 stroke-[2.5]" />}
+                    {isSelected && <Check className="h-3.5 w-3.5 stroke-[1.5]" />}
                   </div>
                 </button>
               );
@@ -199,16 +194,16 @@ export function ExercisePickerModal({
         </div>
 
         {/* Sticky Bottom CTA */}
-        <div className="border-t border-[#E5E5E5] dark:border-[#262626] bg-[#F5F5F5] dark:bg-[#000000] p-4">
+        <div className="border-t border-[var(--border-hairline)] p-4">
           <button
             type="button"
             disabled={selectedIds.length === 0}
             onClick={handleConfirm}
-            className="mech-press flex h-12 w-full items-center justify-center rounded-[2px] border border-[#000000] dark:border-[#FFFFFF] bg-[#000000] dark:bg-[#FFFFFF] px-5 font-mono text-xs font-bold uppercase tracking-widest text-[#FFFFFF] dark:text-[#000000] hover:bg-[#1A1A1A] dark:hover:bg-[#E5E5E5] disabled:cursor-not-allowed disabled:opacity-35"
+            className="calm-press btn-primary flex h-10 w-full items-center justify-center px-5 text-sm font-medium disabled:cursor-not-allowed disabled:opacity-40"
           >
             {selectedIds.length === 0
               ? 'Select exercises to add'
-              : `Add ${selectedIds.length} ${selectedIds.length === 1 ? 'Exercise' : 'Exercises'}`}
+              : `Add ${selectedIds.length} ${selectedIds.length === 1 ? 'exercise' : 'exercises'}`}
           </button>
         </div>
       </div>

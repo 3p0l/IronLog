@@ -14,7 +14,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   distanceUnit: 'km',
   measurementUnit: 'cm',
   defaultRestSeconds: 90,
-  theme: 'light',
+  theme: 'dark',
   restSoundEnabled: true,
 };
 

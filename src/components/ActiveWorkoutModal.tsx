@@ -10,7 +10,14 @@ import {
   Trash2,
   X,
 } from 'lucide-react';
-import { Exercise, PRRecord, SetType, WeightUnit, WorkoutSession, WorkoutSet } from '../types/workout';
+import {
+  Exercise,
+  PRRecord,
+  SetType,
+  WeightUnit,
+  WorkoutSession,
+  WorkoutSet,
+} from '../types/workout';
 import { useWorkout } from '../context/WorkoutContext';
 import {
   calculateWorkoutCompletedSets,
@@ -32,6 +39,7 @@ import { CustomExerciseModal } from './CustomExerciseModal';
 import { ExerciseDetailModal } from './ExerciseDetailModal';
 import { WorkoutSummaryModal } from './WorkoutSummaryModal';
 import { ConfirmDialog } from './ConfirmDialog';
+import { SegmentedControl } from './ui/LinearPrimitives';
 
 const SET_TYPE_ORDER: SetType[] = ['normal', 'warmup', 'drop', 'failure'];
 
@@ -67,22 +75,22 @@ function SetRow({
 
   const tracking = exercise.trackingType;
 
-  const formatPrev = (): string => {
+  const formatPrev = (compact = false): string => {
     if (!previousSet) return '—';
     if (tracking === 'duration') {
       return previousSet.durationSec ? formatDuration(previousSet.durationSec) : '—';
     }
     if (tracking === 'distance') {
       const dist = convertDistanceFromKm(previousSet.distanceKm, distUnit);
-      return dist !== null ? `${dist} ${distUnit}` : '—';
+      return dist !== null ? `${dist}${compact ? '' : ' '}${distUnit}` : '—';
     }
     if (tracking === 'bodyweight') {
-      return previousSet.reps !== null ? `${previousSet.reps} reps` : '—';
+      return previousSet.reps !== null ? `${previousSet.reps}${compact ? 'r' : ' reps'}` : '—';
     }
     const prevUnit = resolveSetWeightUnit(previousSet.weightUnit, exerciseWeightUnit, globalUnit);
-    const wt = formatWeight(previousSet.weightKg, prevUnit, true);
+    const wt = formatWeight(previousSet.weightKg, prevUnit, !compact);
     if (wt === '—' && previousSet.reps === null) return '—';
-    return `${wt} × ${previousSet.reps ?? 0}`;
+    return compact ? `${wt}×${previousSet.reps ?? 0}` : `${wt} × ${previousSet.reps ?? 0}`;
   };
 
   const applyPrevious = () => {
@@ -110,17 +118,16 @@ function SetRow({
       ? 'F'
       : String(displayIndex);
 
-  // Zero-color semantic encoding for set types via border grammar & monochrome patterns
   const setBadgeStyle =
     set.setType === 'warmup'
-      ? 'border border-dashed border-[#737373] bg-transparent text-[#737373]'
+      ? 'border border-dashed border-[var(--border-focus)] bg-transparent text-[var(--ink-secondary)]'
       : set.setType === 'drop'
-      ? 'hud-hatch border border-[#000000] dark:border-[#FFFFFF] text-[#000000] dark:text-[#FFFFFF]'
+      ? 'border border-[var(--accent-steel-border)] bg-[var(--accent-steel-tint)] text-[var(--accent-steel)]'
       : set.setType === 'failure'
-      ? 'border-2 border-[#000000] dark:border-[#FFFFFF] bg-[#FFFFFF] dark:bg-[#000000] text-[#000000] dark:text-[#FFFFFF]'
+      ? 'border border-[var(--accent-clay-border)] bg-[var(--accent-clay-tint)] text-[var(--accent-clay)]'
       : set.completed
-      ? 'border border-[#000000] dark:border-[#FFFFFF] bg-[#000000] dark:bg-[#FFFFFF] text-[#FFFFFF] dark:text-[#000000]'
-      : 'border border-[#E5E5E5] dark:border-[#262626] bg-[#F5F5F5] dark:bg-[#141414] text-[#000000] dark:text-[#FFFFFF]';
+      ? 'border border-[var(--accent-sage-border)] bg-[var(--accent-sage-tint)] text-[var(--accent-sage)]'
+      : 'border border-[var(--border-hairline)] bg-[var(--recessed)] text-[var(--ink-secondary)]';
 
   return (
     <div
@@ -134,16 +141,16 @@ function SetRow({
         else if (delta < -35) setSwipedOpen(false);
         touchStartX.current = null;
       }}
-      className={`group relative grid items-center gap-1.5 sm:gap-2 px-1.5 py-1.5 transition-colors duration-[180ms] ${
+      className={`group relative grid min-h-[48px] items-center gap-1 sm:gap-2 rounded-lg pl-2 pr-1 py-2 transition-colors duration-[180ms] ${
         tracking === 'bodyweight' || tracking === 'duration'
-          ? 'grid-cols-[38px_1fr_92px_44px_30px]'
+          ? 'grid-cols-[36px_1fr_92px_40px_28px]'
           : tracking === 'distance'
-          ? 'grid-cols-[38px_minmax(56px,1fr)_74px_62px_40px_28px] sm:grid-cols-[42px_1fr_92px_82px_44px_36px]'
-          : 'grid-cols-[34px_minmax(52px,1fr)_96px_46px_38px_26px] sm:grid-cols-[42px_1fr_124px_80px_44px_36px]'
+          ? 'grid-cols-[36px_minmax(52px,1fr)_74px_60px_38px_28px] sm:grid-cols-[40px_1fr_92px_80px_40px_32px]'
+          : 'grid-cols-[32px_minmax(48px,1fr)_92px_46px_36px_26px] sm:grid-cols-[40px_1fr_124px_80px_40px_32px]'
       } ${
         set.completed
-          ? 'hud-hatch border-l-[3px] border-l-[#000000] dark:border-l-[#FFFFFF] bg-[#F5F5F5] dark:bg-[#141414]'
-          : 'border-l-[3px] border-l-transparent bg-transparent hover:bg-[#F5F5F5]/70 dark:hover:bg-[#141414]/70'
+          ? 'status-tick status-tick-sage bg-transparent'
+          : 'bg-transparent hover:bg-[var(--surface-hover)]/50'
       }`}
     >
       {/* Set # / Type */}
@@ -152,7 +159,7 @@ function SetRow({
         onClick={() => updateActiveSet(workoutExerciseId, set.id, { setType: cycleSetType(set.setType) })}
         title="Tap to change set type (Normal, Warmup, Drop, Failure)"
         aria-label={`Set ${rowNumber} type ${set.setType}`}
-        className={`mech-press flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-[2px] font-mono text-xs font-bold ${setBadgeStyle}`}
+        className={`calm-press flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-[6px] font-mono text-xs font-medium ${setBadgeStyle}`}
       >
         {setBadgeLabel}
       </button>
@@ -163,9 +170,10 @@ function SetRow({
         onClick={applyPrevious}
         disabled={!previousSet}
         title={previousSet ? 'Tap to copy previous session value' : 'No previous session'}
-        className="mech-press truncate text-left font-mono text-xs tabular-nums text-[#737373] hover:text-[#000000] dark:hover:text-[#FFFFFF] disabled:cursor-default disabled:hover:text-[#737373]"
+        className="calm-press truncate text-left font-mono text-xs tabular-nums text-[var(--ink-muted)] hover:text-[var(--ink-primary)] disabled:cursor-default disabled:hover:text-[var(--ink-muted)]"
       >
-        {formatPrev()}
+        <span className="sm:hidden">{formatPrev(true)}</span>
+        <span className="hidden sm:inline">{formatPrev(false)}</span>
       </button>
 
       {/* Dynamic Metric Inputs */}
@@ -181,7 +189,7 @@ function SetRow({
           }
           placeholder="sec"
           aria-label={`${exercise.name} set ${rowNumber} duration in seconds`}
-          className="h-10 w-full rounded-[2px] border border-[#E5E5E5] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#0A0A0A] px-2.5 text-center font-mono text-sm font-semibold tabular-nums text-[#000000] dark:text-[#FFFFFF] focus:border-[#000000] dark:focus:border-[#FFFFFF] focus:outline-none"
+          className="matte-input h-9 w-full bg-[var(--recessed)] px-2 text-center font-mono text-sm font-medium tabular-nums"
         />
       ) : tracking === 'bodyweight' ? (
         <input
@@ -195,7 +203,7 @@ function SetRow({
           }
           placeholder="reps"
           aria-label={`${exercise.name} set ${rowNumber} reps`}
-          className="h-10 w-full rounded-[2px] border border-[#E5E5E5] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#0A0A0A] px-2.5 text-center font-mono text-sm font-semibold tabular-nums text-[#000000] dark:text-[#FFFFFF] focus:border-[#000000] dark:focus:border-[#FFFFFF] focus:outline-none"
+          className="matte-input h-9 w-full bg-[var(--recessed)] px-2 text-center font-mono text-sm font-medium tabular-nums"
         />
       ) : tracking === 'distance' ? (
         <>
@@ -212,7 +220,7 @@ function SetRow({
             }
             placeholder={distUnit}
             aria-label={`${exercise.name} set ${rowNumber} distance`}
-            className="h-10 w-full rounded-[2px] border border-[#E5E5E5] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#0A0A0A] px-2 text-center font-mono text-sm font-semibold tabular-nums text-[#000000] dark:text-[#FFFFFF] focus:border-[#000000] dark:focus:border-[#FFFFFF] focus:outline-none"
+            className="matte-input h-9 w-full bg-[var(--recessed)] px-2 text-center font-mono text-sm font-medium tabular-nums"
           />
           <input
             type="number"
@@ -225,12 +233,12 @@ function SetRow({
             }
             placeholder="sec"
             aria-label={`${exercise.name} set ${rowNumber} seconds`}
-            className="h-10 w-full rounded-[2px] border border-[#E5E5E5] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#0A0A0A] px-2 text-center font-mono text-sm font-semibold tabular-nums text-[#000000] dark:text-[#FFFFFF] focus:border-[#000000] dark:focus:border-[#FFFFFF] focus:outline-none"
+            className="matte-input h-9 w-full bg-[var(--recessed)] px-2 text-center font-mono text-sm font-medium tabular-nums"
           />
         </>
       ) : (
         <>
-          <div className="flex h-10 w-full items-stretch overflow-hidden rounded-[2px] border border-[#D4D4D4] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#0A0A0A] focus-within:border-[#000000] dark:focus-within:border-[#FFFFFF]">
+          <div className="flex h-9 w-full items-stretch overflow-hidden rounded-lg border border-[var(--border-hairline)] bg-[var(--recessed)] transition-colors focus-within:border-[var(--accent-steel)]">
             <input
               type="number"
               step="any"
@@ -245,17 +253,17 @@ function SetRow({
               }
               placeholder={tracking === 'assisted_bodyweight' ? `-${setUnit}` : '0'}
               aria-label={`${exercise.name} set ${rowNumber} weight`}
-              className="min-w-0 flex-1 bg-transparent px-1 sm:px-1.5 text-center font-mono text-[13px] sm:text-sm font-semibold tabular-nums text-[#000000] dark:text-[#FFFFFF] focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+              className="min-w-0 flex-1 bg-transparent px-1 sm:px-2 text-center font-mono text-xs sm:text-sm font-medium tabular-nums text-[var(--ink-primary)] placeholder-[var(--ink-muted)] focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
             />
             <button
               type="button"
               onClick={toggleSetUnit}
               title={`Switch set ${rowNumber} to ${setUnit === 'kg' ? 'lbs' : 'kg'}`}
               aria-label={`${exercise.name} set ${rowNumber} unit ${setUnit}`}
-              className={`mech-press flex w-8 sm:w-10 shrink-0 items-center justify-center border-l border-[#D4D4D4] dark:border-[#262626] font-mono text-[10px] sm:text-[11px] font-bold uppercase ${
+              className={`calm-press flex w-8 sm:w-9 shrink-0 items-center justify-center border-l border-[var(--border-hairline)] font-mono text-[11px] font-medium transition-colors ${
                 setUnit === 'lbs'
-                  ? 'bg-[#000000] dark:bg-[#FFFFFF] text-[#FFFFFF] dark:text-[#000000]'
-                  : 'bg-[#F5F5F5] dark:bg-[#141414] text-[#000000] dark:text-[#FFFFFF] hover:bg-[#E5E5E5] dark:hover:bg-[#262626]'
+                  ? 'bg-[var(--surface-active)] text-[var(--ink-primary)]'
+                  : 'bg-[var(--surface)] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]'
               }`}
             >
               {setUnit}
@@ -272,24 +280,24 @@ function SetRow({
             }
             placeholder="reps"
             aria-label={`${exercise.name} set ${rowNumber} reps`}
-            className="h-10 w-full rounded-[2px] border border-[#D4D4D4] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#0A0A0A] px-1 sm:px-1.5 text-center font-mono text-[13px] sm:text-sm font-semibold tabular-nums text-[#000000] dark:text-[#FFFFFF] focus:border-[#000000] dark:focus:border-[#FFFFFF] focus:outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+            className="matte-input h-9 w-full bg-[var(--recessed)] px-1 sm:px-2 text-center font-mono text-xs sm:text-sm font-medium tabular-nums [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
           />
         </>
       )}
 
-      {/* Completion Polarity Toggle */}
+      {/* Completion Toggle (Muted Sage) */}
       <button
         type="button"
         onClick={() => toggleActiveSetComplete(workoutExerciseId, set.id)}
         aria-label={`${set.completed ? 'Uncheck' : 'Complete'} ${exercise.name} set ${rowNumber}`}
         aria-pressed={set.completed}
-        className={`mech-press flex h-10 w-10 sm:h-10 sm:w-11 items-center justify-center rounded-[2px] border ${
+        className={`calm-press flex h-9 w-9 sm:w-10 items-center justify-center rounded-lg border transition-colors ${
           set.completed
-            ? 'border-[#000000] dark:border-[#FFFFFF] bg-[#000000] dark:bg-[#FFFFFF] text-[#FFFFFF] dark:text-[#000000]'
-            : 'border-[#D4D4D4] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#0A0A0A] text-[#737373] hover:border-[#000000] dark:hover:border-[#FFFFFF] hover:text-[#000000] dark:hover:text-[#FFFFFF]'
+            ? 'border-[var(--accent-sage-border)] bg-[var(--accent-sage-tint)] text-[var(--accent-sage)]'
+            : 'border-[var(--border-hairline)] bg-[var(--recessed)] text-[var(--ink-muted)] hover:border-[var(--border-focus)] hover:text-[var(--ink-primary)]'
         }`}
       >
-        <Check className="h-4 w-4 stroke-[2.75]" />
+        <Check className="h-4 w-4 stroke-[1.5]" />
       </button>
 
       {/* Delete Set Button */}
@@ -297,13 +305,13 @@ function SetRow({
         type="button"
         onClick={() => deleteSetFromActiveExercise(workoutExerciseId, set.id)}
         aria-label={`Delete ${exercise.name} set ${rowNumber}`}
-        className={`mech-press flex h-9 w-7 sm:w-8 items-center justify-center rounded-[2px] ${
+        className={`calm-press flex h-8 w-6 sm:w-8 items-center justify-center rounded-lg transition-colors ${
           swipedOpen
-            ? 'bg-[#000000] dark:bg-[#FFFFFF] text-[#FFFFFF] dark:text-[#000000]'
-            : 'text-[#A3A3A3] dark:text-[#525252] hover:bg-[#000000] dark:hover:bg-[#FFFFFF] hover:text-[#FFFFFF] dark:hover:text-[#000000]'
+            ? 'bg-[var(--accent-clay-tint)] text-[var(--accent-clay)]'
+            : 'text-[var(--ink-muted)] hover:bg-[var(--accent-clay-tint)] hover:text-[var(--accent-clay)]'
         }`}
       >
-        <Trash2 className="h-3.5 w-3.5" />
+        <Trash2 className="h-4 w-4 stroke-[1.5]" />
       </button>
     </div>
   );
@@ -356,8 +364,14 @@ export function ActiveWorkoutModal() {
     return () => window.clearInterval(timer);
   }, [session?.id, session?.startedAt]);
 
-  const totalVolumeKg = useMemo(() => (session ? calculateWorkoutVolumeKg(session) : 0), [session]);
-  const completedSets = useMemo(() => (session ? calculateWorkoutCompletedSets(session) : 0), [session]);
+  const totalVolumeKg = useMemo(
+    () => (session ? calculateWorkoutVolumeKg(session) : 0),
+    [session]
+  );
+  const completedSets = useMemo(
+    () => (session ? calculateWorkoutCompletedSets(session) : 0),
+    [session]
+  );
   const plannedSets = useMemo(
     () => (session ? session.exercises.reduce((acc, e) => acc + e.sets.length, 0) : 0),
     [session]
@@ -394,32 +408,30 @@ export function ActiveWorkoutModal() {
   return (
     <>
       <div
-        className="hud-view-enter fixed inset-0 z-40 flex flex-col bg-[#FFFFFF] dark:bg-[#000000]"
+        className="view-enter fixed inset-0 z-40 flex flex-col bg-[var(--canvas)]"
         role="region"
         aria-label="Active workout logger"
       >
-        {/* PITCH-BLACK INVERTED ACTIVE TELEMETRY CONSOLE HEADER */}
-        <header className="sticky top-0 z-20 border-b-2 border-[#000000] dark:border-[#FFFFFF] bg-[#000000] text-[#FFFFFF]">
-          <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-2.5 sm:px-6">
-            <div className="flex min-w-0 items-center gap-2">
+        {/* Solid Matte Sticky Header (zero glassmorphism) */}
+        <header className="sticky top-0 z-20 border-b border-[var(--border-hairline)] bg-[var(--recessed)]">
+          <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-3 sm:px-6">
+            <div className="flex min-w-0 items-center gap-3">
               <button
                 type="button"
                 onClick={() => setActiveWorkoutOpen(false)}
                 aria-label="Minimize active workout"
-                className="mech-press flex h-10 w-10 shrink-0 items-center justify-center rounded-[2px] border border-[#262626] bg-[#0A0A0A] text-[#FFFFFF] hover:border-[#FFFFFF]"
+                className="calm-press btn-secondary flex h-9 w-9 shrink-0 items-center justify-center"
               >
-                <ChevronDown className="h-4 w-4" />
+                <ChevronDown className="h-4 w-4 stroke-[1.5]" />
               </button>
-              <div className="min-w-0">
-                <p className="font-mono text-[9px] font-bold tracking-[0.12em] uppercase text-[#737373]">
-                  ■ ACTIVE LOG
-                </p>
+              <div className="status-tick status-tick-steel min-w-0 pl-3">
+                <p className="text-xs font-medium text-[var(--accent-steel)]">Active workout</p>
                 <input
                   type="text"
                   value={session.title}
                   onChange={(e) => updateActiveWorkoutTitle(e.target.value)}
                   aria-label="Workout title"
-                  className="w-full min-w-0 truncate bg-transparent text-sm font-bold tracking-tight text-[#FFFFFF] focus:outline-none sm:text-base"
+                  className="w-full min-w-0 truncate bg-transparent text-sm font-semibold tracking-[-0.01em] text-[var(--ink-primary)] focus:outline-none sm:text-base"
                 />
               </div>
             </div>
@@ -429,212 +441,191 @@ export function ActiveWorkoutModal() {
                 type="button"
                 onClick={() => startRestTimer('manual', db.settings.defaultRestSeconds)}
                 aria-label="Start rest timer"
-                title="Start Rest Timer"
-                className="mech-press flex h-10 w-10 items-center justify-center rounded-[2px] border border-[#262626] bg-[#0A0A0A] text-[#FFFFFF] hover:border-[#FFFFFF]"
+                title="Start rest timer"
+                className="calm-press btn-secondary flex h-9 w-9 items-center justify-center"
               >
-                <Timer className="h-4 w-4" />
+                <Timer className="h-4 w-4 stroke-[1.5]" />
               </button>
               <button
                 type="button"
                 onClick={handleFinishClick}
-                className="mech-press min-h-[40px] rounded-[2px] border border-[#FFFFFF] bg-[#FFFFFF] px-4 font-mono text-xs font-bold tracking-[0.08em] uppercase text-[#000000] hover:bg-[#E5E5E5] whitespace-nowrap"
+                className="calm-press btn-primary h-9 px-4 text-sm font-medium whitespace-nowrap"
               >
                 Finish
               </button>
             </div>
           </div>
 
-          {/* Live Metrics Strip */}
-          <div className="border-t border-[#262626] bg-[#0A0A0A]">
-            <div className="mx-auto grid max-w-4xl grid-cols-3 divide-x divide-[#262626] px-4 sm:px-6">
+          {/* Live Readout Strip */}
+          <div className="border-t border-[var(--border-hairline)]">
+            <div className="mx-auto grid max-w-4xl grid-cols-3 divide-x divide-[var(--border-hairline)] px-4 sm:px-6">
               <div className="py-2 pr-3">
-                <p className="font-mono text-[9px] font-semibold tracking-[0.1em] uppercase text-[#737373]">
-                  DURATION
-                </p>
+                <p className="text-xs text-[var(--ink-muted)]">Duration</p>
                 <p
                   data-testid="active-workout-duration"
-                  className="font-mono text-sm font-bold tabular-nums text-[#FFFFFF]"
+                  className="mt-0.5 font-mono text-sm font-semibold tabular-nums text-[var(--ink-primary)]"
                 >
                   {formatTimerClock(elapsedSec)}
                 </p>
               </div>
               <div className="py-2 px-3">
-                <p className="font-mono text-[9px] font-semibold tracking-[0.1em] uppercase text-[#737373]">
-                  VOLUME
-                </p>
+                <p className="text-xs text-[var(--ink-muted)]">Volume</p>
                 <p
                   data-testid="active-workout-volume"
-                  className="font-mono text-sm font-bold tabular-nums text-[#FFFFFF]"
+                  className="mt-0.5 font-mono text-sm font-semibold tabular-nums text-[var(--ink-primary)]"
                 >
                   {formatVolume(totalVolumeKg, db.settings.weightUnit)}
                 </p>
               </div>
               <div className="py-2 pl-3">
-                <p className="font-mono text-[9px] font-semibold tracking-[0.1em] uppercase text-[#737373]">
-                  SETS
-                </p>
+                <p className="text-xs text-[var(--ink-muted)]">Sets</p>
                 <p
                   data-testid="active-workout-sets"
-                  className="font-mono text-sm font-bold tabular-nums text-[#FFFFFF]"
+                  className="mt-0.5 font-mono text-sm font-semibold tabular-nums text-[var(--ink-primary)]"
                 >
                   {completedSets}
-                  <span className="text-[#737373]"> / {plannedSets}</span>
+                  <span className="font-normal text-[var(--ink-muted)]"> / {plannedSets}</span>
                 </p>
               </div>
             </div>
           </div>
 
-          {/* Live Rest Countdown HUD Bar */}
+          {/* Live Rest Countdown Bar (Steel Accent + 2px left status tick) */}
           {restTimer && restSecondsRemaining > 0 && (
             <div
               data-testid="rest-timer-bar"
-              className="hud-expand-enter border-t border-[#262626] bg-[#141414]"
+              className="view-enter border-t border-[var(--border-hairline)] bg-[var(--surface)]"
             >
               <div className="mx-auto flex max-w-4xl items-center justify-between gap-3 px-4 py-2 sm:px-6">
-                <div className="flex items-center gap-2.5">
-                  <Clock className="h-3.5 w-3.5 text-[#FFFFFF]" />
-                  <span className="font-mono text-[10px] font-bold tracking-[0.1em] uppercase text-[#A3A3A3]">
-                    REST //
+                <div className="status-tick status-tick-steel flex items-center gap-2 pl-3">
+                  <span className="flex h-5 w-5 items-center justify-center text-[var(--accent-steel)]">
+                    <Clock className="h-4 w-4 stroke-[1.5]" />
                   </span>
-                  <span className="font-mono text-base font-bold tabular-nums text-[#FFFFFF]">
+                  <span className="text-xs font-medium text-[var(--ink-secondary)]">Rest</span>
+                  <span className="font-mono text-sm font-semibold tabular-nums text-[var(--ink-primary)]">
                     {formatTimerClock(restSecondsRemaining)}
                   </span>
                 </div>
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-2">
                   <button
                     type="button"
                     onClick={() => adjustRestTimer(-15)}
-                    className="mech-press min-h-[34px] rounded-[2px] border border-[#262626] bg-[#000000] px-2.5 font-mono text-[11px] font-bold text-[#FFFFFF] hover:border-[#FFFFFF]"
+                    className="calm-press btn-secondary h-8 px-3 font-mono text-xs font-medium"
                   >
                     -15s
                   </button>
                   <button
                     type="button"
                     onClick={() => adjustRestTimer(15)}
-                    className="mech-press min-h-[34px] rounded-[2px] border border-[#262626] bg-[#000000] px-2.5 font-mono text-[11px] font-bold text-[#FFFFFF] hover:border-[#FFFFFF]"
+                    className="calm-press btn-secondary h-8 px-3 font-mono text-xs font-medium"
                   >
                     +15s
                   </button>
                   <button
                     type="button"
                     onClick={skipRestTimer}
-                    className="mech-press min-h-[34px] rounded-[2px] border border-[#FFFFFF] bg-[#FFFFFF] px-3 font-mono text-[11px] font-bold uppercase tracking-[0.06em] text-[#000000] hover:bg-[#E5E5E5]"
+                    className="calm-press btn-primary h-8 px-3 text-xs font-medium"
                   >
                     Skip
                   </button>
                 </div>
               </div>
-              <div className="h-1 w-full bg-[#262626]">
-                <div
-                  className="h-full bg-[#FFFFFF]"
-                  style={{ width: `${restProgressPct}%` }}
-                />
+              <div className="mx-auto max-w-4xl px-4 pb-2 sm:px-6">
+                <div className="h-1 w-full overflow-hidden rounded-full bg-[var(--recessed)]">
+                  <div
+                    className="h-full rounded-full bg-[var(--accent-steel)] transition-[width] duration-200"
+                    style={{ width: `${restProgressPct}%` }}
+                  />
+                </div>
               </div>
-              <div className="hud-ruler h-1.5 w-full text-[#262626]" aria-hidden="true" />
             </div>
           )}
         </header>
 
-        {/* Scrollable Stark-White Exercise Modules */}
-        <div className="flex-1 overflow-y-auto bg-[#F5F5F5] dark:bg-[#000000]">
-          <div className="mx-auto max-w-4xl space-y-4 px-3 py-5 pb-20 sm:px-6">
+        {/* Scrollable Exercise Logger Containers */}
+        <div className="flex-1 overflow-y-auto">
+          <div className="mx-auto max-w-4xl space-y-5 px-3 py-6 pb-20 sm:px-6">
             {session.exercises.length === 0 ? (
-              <div className="hud-dot-matrix border border-dashed border-[#D4D4D4] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#0A0A0A] px-6 py-12 text-center">
-                <span className="inline-block border border-[#000000] dark:border-[#FFFFFF] bg-[#FFFFFF] dark:bg-[#000000] px-2.5 py-1 font-mono text-[10px] font-bold tracking-[0.1em] uppercase">
-                  00 // READY TO LOG
-                </span>
-                <h3 className="mt-3 text-base font-bold text-[#000000] dark:text-[#FFFFFF]">
-                  Ready to lift
-                </h3>
-                <p className="mt-1.5 text-xs text-[#737373]">
-                  Add exercises below to start recording sets, weights, and reps.
+              <div className="matte-surface px-6 py-12 text-center">
+                <h2 className="text-base font-semibold text-[var(--ink-primary)]">
+                  No exercises in session
+                </h2>
+                <p className="mt-1 text-sm text-[var(--ink-secondary)]">
+                  Add exercises to record sets, weights, and reps
                 </p>
                 <button
                   type="button"
                   onClick={() => setPickerOpen(true)}
-                  className="mech-press mt-5 inline-flex min-h-[44px] items-center gap-2 rounded-[2px] bg-[#000000] dark:bg-[#FFFFFF] px-6 font-mono text-xs font-bold tracking-[0.06em] uppercase text-[#FFFFFF] dark:text-[#000000]"
+                  className="calm-press btn-primary mt-5 inline-flex h-10 items-center gap-2 px-5 text-sm font-medium whitespace-nowrap"
                 >
-                  <Plus className="h-4 w-4" />
-                  Add Exercise
+                  <Plus className="h-4 w-4 stroke-[1.5]" />
+                  Add exercise
                 </button>
               </div>
             ) : (
               session.exercises.map((wEx, exIdx) => {
                 const exDef = exerciseMap.get(wEx.exerciseId);
                 if (!exDef) return null;
-                const previousSets = getPreviousExerciseSets(exDef.id, db.workouts, session.startedAt);
+                const previousSets = getPreviousExerciseSets(
+                  exDef.id,
+                  db.workouts,
+                  session.startedAt
+                );
                 const tracking = exDef.trackingType;
-                const isWeighted = tracking === 'weight_reps' || tracking === 'assisted_bodyweight';
+                const isWeighted =
+                  tracking === 'weight_reps' || tracking === 'assisted_bodyweight';
                 const exerciseUnit = wEx.weightUnit ?? db.settings.weightUnit;
                 const hasMixedSetUnits =
                   isWeighted &&
-                  new Set(wEx.sets.map((s) => resolveSetWeightUnit(s.weightUnit, wEx.weightUnit, db.settings.weightUnit))).size > 1;
+                  new Set(
+                    wEx.sets.map((s) =>
+                      resolveSetWeightUnit(s.weightUnit, wEx.weightUnit, db.settings.weightUnit)
+                    )
+                  ).size > 1;
 
                 let normalCounter = 0;
 
                 return (
-                  <section
-                    key={wEx.id}
-                    className="hud-frame border border-[#E5E5E5] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#0A0A0A] p-3 sm:p-4 space-y-3"
-                  >
+                  <section key={wEx.id} className="matte-surface p-4 space-y-3">
                     {/* Exercise Header */}
-                    <div className="flex flex-wrap items-start justify-between gap-2 border-b border-[#E5E5E5] dark:border-[#262626] pb-3">
+                    <div className="flex flex-wrap items-start justify-between gap-3 border-b border-[var(--border-hairline)] pb-3">
                       <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono text-[10px] font-bold tracking-[0.08em] text-[#737373] tabular-nums">
-                            {String(exIdx + 1).padStart(2, '0')} //
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => setDetailExercise(exDef)}
-                            className="truncate text-left text-sm sm:text-base font-bold text-[#000000] dark:text-[#FFFFFF] underline-offset-4 hover:underline"
-                          >
-                            {exDef.name}
-                          </button>
-                        </div>
-                        <p className="mt-0.5 font-mono text-[10px] uppercase tracking-[0.08em] text-[#737373]">
+                        <button
+                          type="button"
+                          onClick={() => setDetailExercise(exDef)}
+                          className="truncate text-left text-sm sm:text-base font-semibold text-[var(--ink-primary)] hover:underline underline-offset-4"
+                        >
+                          {exDef.name}
+                        </button>
+                        <p className="mt-1 text-xs text-[var(--ink-secondary)]">
                           {exDef.primaryMuscle} · {exDef.equipment}
                           {hasMixedSetUnits ? ' · Mixed kg/lbs' : ''}
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-1 shrink-0">
+                      <div className="flex flex-wrap items-center gap-2 shrink-0">
                         {isWeighted && (
-                          <div
-                            className="flex items-center border border-[#000000] dark:border-[#FFFFFF] bg-[#FFFFFF] dark:bg-[#0A0A0A]"
-                            role="group"
-                            aria-label={`${exDef.name} weight unit`}
-                          >
-                            {(['kg', 'lbs'] as const).map((u) => {
-                              const active = !hasMixedSetUnits && exerciseUnit === u;
-                              return (
-                                <button
-                                  key={u}
-                                  type="button"
-                                  onClick={() => updateActiveExerciseWeightUnit(wEx.id, u)}
-                                  aria-label={`Set ${exDef.name} to ${u}`}
-                                  aria-pressed={active}
-                                  className={`mech-press h-8 px-2 font-mono text-[10px] font-bold uppercase ${
-                                    active
-                                      ? 'bg-[#000000] dark:bg-[#FFFFFF] text-[#FFFFFF] dark:text-[#000000]'
-                                      : 'text-[#737373] hover:text-[#000000] dark:hover:text-[#FFFFFF]'
-                                  }`}
-                                >
-                                  {u}
-                                </button>
-                              );
-                            })}
-                          </div>
+                          <SegmentedControl<WeightUnit>
+                            value={hasMixedSetUnits ? null : exerciseUnit}
+                            onChange={(u) => updateActiveExerciseWeightUnit(wEx.id, u)}
+                            layoutId={`active-ex-unit-${wEx.id}`}
+                            size="xs"
+                            ariaLabel={`${exDef.name} weight unit`}
+                            options={[
+                              { value: 'kg', label: 'kg', ariaLabel: `Set ${exDef.name} to kg` },
+                              { value: 'lbs', label: 'lbs', ariaLabel: `Set ${exDef.name} to lbs` },
+                            ]}
+                          />
                         )}
                         <select
                           value={wEx.restSeconds}
                           onChange={(e) => updateActiveExerciseRest(wEx.id, Number(e.target.value))}
                           aria-label={`${exDef.name} rest timer`}
-                          className="h-8 rounded-[2px] border border-[#E5E5E5] dark:border-[#262626] bg-[#F5F5F5] dark:bg-[#141414] px-2 font-mono text-[11px] font-semibold text-[#000000] dark:text-[#FFFFFF]"
+                          className="matte-input h-8 bg-[var(--recessed)] px-2 font-mono text-xs tabular-nums"
                         >
                           {[0, 30, 45, 60, 75, 90, 120, 150, 180, 240, 300].map((sec) => (
                             <option key={sec} value={sec}>
-                              {sec === 0 ? 'Rest Off' : `Rest ${sec}s`}
+                              {sec === 0 ? 'Rest off' : `Rest ${sec}s`}
                             </option>
                           ))}
                         </select>
@@ -643,26 +634,26 @@ export function ActiveWorkoutModal() {
                           onClick={() => moveActiveWorkoutExercise(wEx.id, 'up')}
                           disabled={exIdx === 0}
                           aria-label={`Move ${exDef.name} up`}
-                          className="mech-press flex h-8 w-7 items-center justify-center rounded-[2px] text-[#737373] hover:bg-[#F5F5F5] dark:hover:bg-[#141414] hover:text-[#000000] dark:hover:text-[#FFFFFF] disabled:opacity-25"
+                          className="calm-press btn-ghost flex h-8 w-8 items-center justify-center disabled:opacity-25"
                         >
-                          <ArrowUp className="h-3.5 w-3.5" />
+                          <ArrowUp className="h-4 w-4 stroke-[1.5]" />
                         </button>
                         <button
                           type="button"
                           onClick={() => moveActiveWorkoutExercise(wEx.id, 'down')}
                           disabled={exIdx === session.exercises.length - 1}
                           aria-label={`Move ${exDef.name} down`}
-                          className="mech-press flex h-8 w-7 items-center justify-center rounded-[2px] text-[#737373] hover:bg-[#F5F5F5] dark:hover:bg-[#141414] hover:text-[#000000] dark:hover:text-[#FFFFFF] disabled:opacity-25"
+                          className="calm-press btn-ghost flex h-8 w-8 items-center justify-center disabled:opacity-25"
                         >
-                          <ArrowDown className="h-3.5 w-3.5" />
+                          <ArrowDown className="h-4 w-4 stroke-[1.5]" />
                         </button>
                         <button
                           type="button"
                           onClick={() => removeExerciseFromActiveWorkout(wEx.id)}
                           aria-label={`Remove ${exDef.name}`}
-                          className="mech-press flex h-8 w-7 items-center justify-center rounded-[2px] text-[#737373] hover:bg-[#000000] dark:hover:bg-[#FFFFFF] hover:text-[#FFFFFF] dark:hover:text-[#000000]"
+                          className="calm-press flex h-8 w-8 items-center justify-center rounded-lg text-[var(--ink-muted)] hover:bg-[var(--accent-clay-tint)] hover:text-[var(--accent-clay)]"
                         >
-                          <X className="h-3.5 w-3.5" />
+                          <X className="h-4 w-4 stroke-[1.5]" />
                         </button>
                       </div>
                     </div>
@@ -672,19 +663,19 @@ export function ActiveWorkoutModal() {
                       type="text"
                       value={wEx.notes}
                       onChange={(e) => updateActiveExerciseNotes(wEx.id, e.target.value)}
-                      placeholder="// Add exercise cues or notes..."
+                      placeholder="Add exercise cues or notes"
                       aria-label={`${exDef.name} notes`}
-                      className="w-full rounded-[2px] bg-transparent px-1 py-1 font-mono text-xs text-[#737373] placeholder-[#A3A3A3] dark:placeholder-[#525252] focus:bg-[#F5F5F5] dark:focus:bg-[#141414] focus:text-[#000000] dark:focus:text-[#FFFFFF] focus:outline-none"
+                      className="w-full rounded-lg bg-transparent px-2 py-2 text-xs text-[var(--ink-secondary)] placeholder-[var(--ink-muted)] transition-colors focus:bg-[var(--recessed)] focus:text-[var(--ink-primary)] focus:outline-none"
                     />
 
                     {/* Set Table Header */}
                     <div
-                      className={`grid items-center gap-1.5 sm:gap-2 border-b border-[#E5E5E5] dark:border-[#262626] px-1.5 pb-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.08em] text-[#737373] ${
+                      className={`grid items-center gap-1 sm:gap-2 pl-2 pr-1 pb-1 text-xs font-medium text-[var(--ink-muted)] ${
                         tracking === 'bodyweight' || tracking === 'duration'
-                          ? 'grid-cols-[38px_1fr_92px_44px_30px]'
+                          ? 'grid-cols-[36px_1fr_92px_40px_28px]'
                           : tracking === 'distance'
-                          ? 'grid-cols-[38px_minmax(56px,1fr)_74px_62px_40px_28px] sm:grid-cols-[42px_1fr_92px_82px_44px_36px]'
-                          : 'grid-cols-[34px_minmax(52px,1fr)_96px_46px_38px_26px] sm:grid-cols-[42px_1fr_124px_80px_44px_36px]'
+                          ? 'grid-cols-[36px_minmax(52px,1fr)_74px_60px_38px_28px] sm:grid-cols-[40px_1fr_92px_80px_40px_32px]'
+                          : 'grid-cols-[32px_minmax(48px,1fr)_92px_46px_36px_26px] sm:grid-cols-[40px_1fr_124px_80px_40px_32px]'
                       }`}
                     >
                       <span className="text-center">Set</span>
@@ -711,7 +702,7 @@ export function ActiveWorkoutModal() {
                     </div>
 
                     {/* Sets */}
-                    <div className="divide-y divide-[#F5F5F5] dark:divide-[#141414]">
+                    <div className="divide-y divide-[var(--border-hairline)]">
                       {wEx.sets.map((s, rowIdx) => {
                         if (s.setType === 'normal') normalCounter += 1;
                         const displayIdx = normalCounter || 1;
@@ -734,10 +725,10 @@ export function ActiveWorkoutModal() {
                     <button
                       type="button"
                       onClick={() => addSetToActiveExercise(wEx.id)}
-                      className="mech-press flex h-10 w-full items-center justify-center gap-1.5 rounded-[2px] border border-dashed border-[#D4D4D4] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#0A0A0A] font-mono text-[11px] font-bold uppercase tracking-[0.06em] text-[#000000] dark:text-[#FFFFFF] hover:border-[#000000] dark:hover:border-[#FFFFFF] hover:bg-[#F5F5F5] dark:hover:bg-[#141414]"
+                      className="calm-press flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-dashed border-[var(--border-hairline)] bg-transparent text-xs font-medium text-[var(--ink-secondary)] hover:border-[var(--border-focus)] hover:bg-[var(--surface-hover)] hover:text-[var(--ink-primary)]"
                     >
-                      <Plus className="h-3.5 w-3.5" />
-                      Add Set
+                      <Plus className="h-4 w-4 stroke-[1.5]" />
+                      Add set
                     </button>
                   </section>
                 );
@@ -749,17 +740,17 @@ export function ActiveWorkoutModal() {
               <button
                 type="button"
                 onClick={() => setPickerOpen(true)}
-                className="mech-press flex h-12 items-center justify-center gap-2 rounded-[2px] border border-[#000000] dark:border-[#FFFFFF] bg-[#000000] dark:bg-[#FFFFFF] font-mono text-xs font-bold uppercase tracking-[0.08em] text-[#FFFFFF] dark:text-[#000000] hover:bg-[#262626] dark:hover:bg-[#E5E5E5]"
+                className="calm-press btn-primary flex h-11 items-center justify-center gap-2 text-sm font-medium whitespace-nowrap"
               >
-                <Plus className="h-4 w-4" />
-                Add Exercise
+                <Plus className="h-4 w-4 stroke-[1.5]" />
+                Add exercise
               </button>
               <button
                 type="button"
                 onClick={() => setDiscardConfirmOpen(true)}
-                className="mech-press flex h-12 items-center justify-center gap-2 rounded-[2px] border border-[#000000] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#0A0A0A] font-mono text-xs font-bold uppercase tracking-[0.08em] text-[#000000] dark:text-[#FFFFFF] hover:bg-[#F5F5F5] dark:hover:bg-[#141414]"
+                className="calm-press btn-danger flex h-11 items-center justify-center gap-2 text-sm font-medium whitespace-nowrap"
               >
-                Discard Workout
+                Discard workout
               </button>
             </div>
           </div>
@@ -799,9 +790,9 @@ export function ActiveWorkoutModal() {
 
       <ConfirmDialog
         open={discardConfirmOpen}
-        title="Discard active workout?"
-        description="All logged sets in this session will be lost. Your routines and past workouts will not be affected."
-        confirmLabel="Discard Workout"
+        title="Discard active workout"
+        description="All logged sets in this session will be lost. Saved routines and history remain intact"
+        confirmLabel="Discard workout"
         destructive
         onCancel={() => setDiscardConfirmOpen(false)}
         onConfirm={() => {
@@ -812,9 +803,9 @@ export function ActiveWorkoutModal() {
 
       <ConfirmDialog
         open={emptyFinishWarning}
-        title="No completed sets yet"
-        description="Check off at least one set before finishing your workout, or discard the session if you want to cancel."
-        confirmLabel="Keep Logging"
+        title="No completed sets"
+        description="Check off at least one set before finishing, or discard the session"
+        confirmLabel="Keep logging"
         cancelLabel="Discard"
         onConfirm={() => setEmptyFinishWarning(false)}
         onCancel={() => {

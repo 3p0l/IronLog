@@ -1,4 +1,5 @@
 import React from 'react';
+import { AlertTriangle } from 'lucide-react';
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -25,52 +26,48 @@ export function ConfirmDialog({
 
   return (
     <div
-      className="hud-scrim hud-scrim-enter fixed inset-0 z-50 flex items-center justify-center p-4"
+      className="matte-scrim scrim-enter fixed inset-0 z-50 flex items-center justify-center p-4"
       role="dialog"
       aria-modal="true"
       aria-labelledby="confirm-dialog-title"
     >
-      <div className="hud-modal-enter hud-frame w-full max-w-sm rounded-[2px] border-2 border-[#000000] dark:border-[#FFFFFF] bg-[#FFFFFF] dark:bg-[#0A0A0A] overflow-hidden">
-        {destructive && (
-          <div className="hud-hatch-strong border-b border-[#000000] dark:border-[#FFFFFF] px-5 py-2 flex items-center justify-between">
-            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.14em] bg-[#FFFFFF] dark:bg-[#000000] text-[#000000] dark:text-[#FFFFFF] px-1.5 py-0.5 border border-[#000000] dark:border-[#FFFFFF]">
-              [!] CAUTION // IRREVERSIBLE
-            </span>
+      <div className="matte-modal modal-enter w-full max-w-sm overflow-hidden p-6">
+        <div className="flex items-start gap-3">
+          {destructive && (
+            <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[var(--accent-clay-border)] bg-[var(--accent-clay-tint)] text-[var(--accent-clay)]">
+              <AlertTriangle className="h-4 w-4 stroke-[1.5]" />
+            </div>
+          )}
+          <div className="min-w-0">
+            <h3
+              id="confirm-dialog-title"
+              className="text-base font-semibold tracking-[-0.01em] text-[var(--ink-primary)]"
+            >
+              {title}
+            </h3>
+            <p className="mt-2 text-sm leading-relaxed text-[var(--ink-secondary)]">
+              {description}
+            </p>
           </div>
-        )}
-        <div className="p-5">
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-[#737373]">
-            {destructive ? 'SYS // DESTRUCTIVE ACTION' : 'SYS // CONFIRMATION'}
-          </p>
-          <h3
-            id="confirm-dialog-title"
-            className="mt-1.5 text-base font-bold tracking-tight text-[#000000] dark:text-[#FFFFFF]"
+        </div>
+
+        <div className="mt-6 flex items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="calm-press btn-secondary h-9 px-4 text-sm font-medium whitespace-nowrap"
           >
-            {title}
-          </h3>
-          <p className="mt-2 text-sm leading-relaxed text-[#525252] dark:text-[#A3A3A3]">
-            {description}
-          </p>
-          <div className="mt-6 flex items-center justify-end gap-2.5 border-t border-[#E5E5E5] dark:border-[#262626] pt-4">
-            <button
-              type="button"
-              onClick={onCancel}
-              className="mech-press min-h-[42px] rounded-[2px] border border-[#000000] dark:border-[#FFFFFF] bg-[#FFFFFF] dark:bg-[#0A0A0A] px-4 py-2 font-mono text-xs font-bold uppercase tracking-wider text-[#000000] dark:text-[#FFFFFF] hover:bg-[#F5F5F5] dark:hover:bg-[#141414] whitespace-nowrap"
-            >
-              {cancelLabel}
-            </button>
-            <button
-              type="button"
-              onClick={onConfirm}
-              className={`mech-press min-h-[42px] rounded-[2px] border px-4 py-2 font-mono text-xs font-bold uppercase tracking-wider whitespace-nowrap ${
-                destructive
-                  ? 'border-[#000000] dark:border-[#FFFFFF] bg-[#000000] dark:bg-[#FFFFFF] text-[#FFFFFF] dark:text-[#000000] hover:bg-[#1A1A1A] dark:hover:bg-[#E5E5E5]'
-                  : 'border-[#000000] dark:border-[#FFFFFF] bg-[#000000] dark:bg-[#FFFFFF] text-[#FFFFFF] dark:text-[#000000] hover:bg-[#1A1A1A] dark:hover:bg-[#E5E5E5]'
-              }`}
-            >
-              {confirmLabel}
-            </button>
-          </div>
+            {cancelLabel}
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className={`calm-press h-9 px-4 text-sm font-medium whitespace-nowrap ${
+              destructive ? 'btn-danger' : 'btn-primary'
+            }`}
+          >
+            {confirmLabel}
+          </button>
         </div>
       </div>
     </div>

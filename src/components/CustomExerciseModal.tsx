@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { X } from 'lucide-react';
+import { Check, X } from 'lucide-react';
 import {
   ALL_EQUIPMENT_TYPES,
   ALL_MUSCLE_GROUPS,
@@ -66,7 +66,7 @@ export function CustomExerciseModal({
     e.preventDefault();
     const trimmed = name.trim();
     if (!trimmed) {
-      setError('Please enter an exercise name.');
+      setError('Enter an exercise name');
       return;
     }
 
@@ -85,32 +85,31 @@ export function CustomExerciseModal({
 
   return (
     <div
-      className="hud-scrim hud-scrim-enter fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4"
+      className="matte-scrim scrim-enter fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4"
       role="dialog"
       aria-modal="true"
       aria-label={editingExercise ? 'Edit custom exercise' : 'Create custom exercise'}
     >
       <form
         onSubmit={handleSubmit}
-        className="hud-modal-enter hud-frame flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-[2px] border-2 border-[#000000] dark:border-[#FFFFFF] bg-[#FFFFFF] dark:bg-[#0A0A0A]"
+        className="matte-modal modal-enter flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden"
       >
-        {/* Inverted Pitch-Black Header */}
-        <div className="flex items-center justify-between border-b border-[#262626] bg-[#000000] px-5 py-3.5 text-[#FFFFFF]">
+        <div className="flex items-center justify-between border-b border-[var(--border-hairline)] px-5 py-4">
           <div>
-            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-[#A3A3A3]">
-              03 // CUSTOM MOVEMENT
-            </p>
-            <h2 className="mt-0.5 text-base font-bold tracking-tight text-[#FFFFFF]">
-              {editingExercise ? 'Edit Custom Exercise' : 'Create Custom Exercise'}
+            <h2 className="text-base font-semibold tracking-[-0.01em] text-[var(--ink-primary)]">
+              {editingExercise ? 'Edit custom exercise' : 'Create custom exercise'}
             </h2>
+            <p className="mt-1 text-xs text-[var(--ink-secondary)]">
+              Movement group, equipment, and tracking mode
+            </p>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close custom exercise form"
-            className="mech-press flex h-10 w-10 items-center justify-center rounded-[2px] border border-[#262626] bg-[#0A0A0A] text-[#FFFFFF] hover:border-[#FFFFFF]"
+            className="calm-press btn-ghost flex h-8 w-8 items-center justify-center"
           >
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4 stroke-[1.5]" />
           </button>
         </div>
 
@@ -118,9 +117,9 @@ export function CustomExerciseModal({
           <div>
             <label
               htmlFor="custom-ex-name"
-              className="mb-1.5 block font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-[#525252] dark:text-[#A3A3A3]"
+              className="mb-2 block text-xs font-medium text-[var(--ink-secondary)]"
             >
-              Exercise Name
+              Exercise name
             </label>
             <input
               id="custom-ex-name"
@@ -131,12 +130,10 @@ export function CustomExerciseModal({
                 if (error) setError('');
               }}
               placeholder="e.g. Meadow's Row (Landmine)"
-              className="h-11 w-full rounded-[2px] border border-[#000000] dark:border-[#FFFFFF] bg-[#FFFFFF] dark:bg-[#000000] px-3.5 text-sm font-medium text-[#000000] dark:text-[#FFFFFF] placeholder-[#737373] focus:outline-none focus:ring-1 focus:ring-[#000000] dark:focus:ring-[#FFFFFF]"
+              className="matte-input h-10 w-full bg-[var(--recessed)] px-3 text-sm"
             />
             {error && (
-              <p className="mt-1.5 font-mono text-xs font-bold text-[#000000] dark:text-[#FFFFFF]">
-                [!] {error}
-              </p>
+              <p className="mt-2 text-xs font-medium text-[var(--accent-clay)]">{error}</p>
             )}
           </div>
 
@@ -144,9 +141,9 @@ export function CustomExerciseModal({
             <div>
               <label
                 htmlFor="custom-ex-primary"
-                className="mb-1.5 block font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-[#525252] dark:text-[#A3A3A3]"
+                className="mb-2 block text-xs font-medium text-[var(--ink-secondary)]"
               >
-                Primary Muscle Group
+                Primary muscle group
               </label>
               <select
                 id="custom-ex-primary"
@@ -156,7 +153,7 @@ export function CustomExerciseModal({
                   setPrimaryMuscle(next);
                   setSecondaryMuscles((prev) => prev.filter((m) => m !== next));
                 }}
-                className="h-11 w-full rounded-[2px] border border-[#E5E5E5] dark:border-[#262626] bg-[#F5F5F5] dark:bg-[#141414] px-3 text-sm font-medium text-[#000000] dark:text-[#FFFFFF] focus:border-[#000000] dark:focus:border-[#FFFFFF] focus:outline-none"
+                className="matte-input h-10 w-full bg-[var(--recessed)] px-3 text-sm"
               >
                 {ALL_MUSCLE_GROUPS.map((m) => (
                   <option key={m} value={m}>
@@ -169,7 +166,7 @@ export function CustomExerciseModal({
             <div>
               <label
                 htmlFor="custom-ex-equipment"
-                className="mb-1.5 block font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-[#525252] dark:text-[#A3A3A3]"
+                className="mb-2 block text-xs font-medium text-[var(--ink-secondary)]"
               >
                 Equipment
               </label>
@@ -177,7 +174,7 @@ export function CustomExerciseModal({
                 id="custom-ex-equipment"
                 value={equipment}
                 onChange={(e) => setEquipment(e.target.value as EquipmentType)}
-                className="h-11 w-full rounded-[2px] border border-[#E5E5E5] dark:border-[#262626] bg-[#F5F5F5] dark:bg-[#141414] px-3 text-sm font-medium text-[#000000] dark:text-[#FFFFFF] focus:border-[#000000] dark:focus:border-[#FFFFFF] focus:outline-none"
+                className="matte-input h-10 w-full bg-[var(--recessed)] px-3 text-sm"
               >
                 {ALL_EQUIPMENT_TYPES.map((eq) => (
                   <option key={eq} value={eq}>
@@ -191,15 +188,15 @@ export function CustomExerciseModal({
           <div>
             <label
               htmlFor="custom-ex-tracking"
-              className="mb-1.5 block font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-[#525252] dark:text-[#A3A3A3]"
+              className="mb-2 block text-xs font-medium text-[var(--ink-secondary)]"
             >
-              Tracking Type
+              Tracking type
             </label>
             <select
               id="custom-ex-tracking"
               value={trackingType}
               onChange={(e) => setTrackingType(e.target.value as TrackingType)}
-              className="h-11 w-full rounded-[2px] border border-[#E5E5E5] dark:border-[#262626] bg-[#F5F5F5] dark:bg-[#141414] px-3 text-sm font-medium text-[#000000] dark:text-[#FFFFFF] focus:border-[#000000] dark:focus:border-[#FFFFFF] focus:outline-none"
+              className="matte-input h-10 w-full bg-[var(--recessed)] px-3 text-sm"
             >
               {(Object.keys(TRACKING_TYPE_LABELS) as TrackingType[]).map((key) => (
                 <option key={key} value={key}>
@@ -210,10 +207,10 @@ export function CustomExerciseModal({
           </div>
 
           <div>
-            <span className="mb-2 block font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-[#525252] dark:text-[#A3A3A3]">
-              Secondary Muscles (Optional)
+            <span className="mb-2 block text-xs font-medium text-[var(--ink-secondary)]">
+              Secondary muscles (optional)
             </span>
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-2">
               {ALL_MUSCLE_GROUPS.filter((m) => m !== primaryMuscle).map((muscle) => {
                 const active = secondaryMuscles.includes(muscle);
                 return (
@@ -222,13 +219,14 @@ export function CustomExerciseModal({
                     type="button"
                     onClick={() => toggleSecondary(muscle)}
                     aria-pressed={active}
-                    className={`mech-press min-h-[34px] rounded-[2px] border px-2.5 font-mono text-[11px] font-semibold uppercase tracking-wider whitespace-nowrap ${
+                    className={`calm-press inline-flex h-8 items-center gap-1 rounded-[6px] border px-3 text-xs font-medium whitespace-nowrap transition-colors ${
                       active
-                        ? 'border-[#000000] dark:border-[#FFFFFF] bg-[#000000] dark:bg-[#FFFFFF] text-[#FFFFFF] dark:text-[#000000]'
-                        : 'border-[#E5E5E5] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#0A0A0A] text-[#525252] dark:text-[#A3A3A3] hover:border-[#000000] dark:hover:border-[#FFFFFF] hover:text-[#000000] dark:hover:text-[#FFFFFF]'
+                        ? 'border-[var(--accent-steel-border)] bg-[var(--accent-steel-tint)] text-[var(--accent-steel)]'
+                        : 'border-[var(--border-hairline)] bg-[var(--recessed)] text-[var(--ink-secondary)] hover:border-[var(--border-focus)] hover:text-[var(--ink-primary)]'
                     }`}
                   >
-                    {active ? `[✓] ${muscle}` : muscle}
+                    {active && <Check className="h-3 w-3 stroke-[1.5]" />}
+                    {muscle}
                   </button>
                 );
               })}
@@ -238,34 +236,34 @@ export function CustomExerciseModal({
           <div>
             <label
               htmlFor="custom-ex-notes"
-              className="mb-1.5 block font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-[#525252] dark:text-[#A3A3A3]"
+              className="mb-2 block text-xs font-medium text-[var(--ink-secondary)]"
             >
-              Form Cues / Notes
+              Form cues and notes
             </label>
             <textarea
               id="custom-ex-notes"
               rows={2}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              placeholder="Optional setup or form cues..."
-              className="w-full rounded-[2px] border border-[#E5E5E5] dark:border-[#262626] bg-[#F5F5F5] dark:bg-[#141414] p-3 text-sm text-[#000000] dark:text-[#FFFFFF] placeholder-[#737373] focus:border-[#000000] dark:focus:border-[#FFFFFF] focus:outline-none"
+              placeholder="Optional setup or form cues"
+              className="matte-input w-full bg-[var(--recessed)] p-3 text-sm"
             />
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-2.5 border-t border-[#E5E5E5] dark:border-[#262626] bg-[#F5F5F5] dark:bg-[#000000] px-5 py-3.5">
+        <div className="flex items-center justify-end gap-2 border-t border-[var(--border-hairline)] px-5 py-4">
           <button
             type="button"
             onClick={onClose}
-            className="mech-press min-h-[42px] rounded-[2px] border border-[#000000] dark:border-[#FFFFFF] bg-[#FFFFFF] dark:bg-[#0A0A0A] px-4 font-mono text-xs font-bold uppercase tracking-wider text-[#000000] dark:text-[#FFFFFF] hover:bg-[#E5E5E5] dark:hover:bg-[#141414]"
+            className="calm-press btn-secondary h-9 px-4 text-sm font-medium whitespace-nowrap"
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="mech-press min-h-[42px] rounded-[2px] border border-[#000000] dark:border-[#FFFFFF] bg-[#000000] dark:bg-[#FFFFFF] px-5 font-mono text-xs font-bold uppercase tracking-wider text-[#FFFFFF] dark:text-[#000000] hover:bg-[#1A1A1A] dark:hover:bg-[#E5E5E5]"
+            className="calm-press btn-primary h-9 px-4 text-sm font-medium whitespace-nowrap"
           >
-            {editingExercise ? 'Save Changes' : 'Create Exercise'}
+            {editingExercise ? 'Save changes' : 'Create exercise'}
           </button>
         </div>
       </form>

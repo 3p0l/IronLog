@@ -16,6 +16,7 @@ import {
 } from '../utils/calculations';
 import { ProgressChart } from './charts/ProgressChart';
 import { ConfirmDialog } from './ConfirmDialog';
+import { SegmentedControl } from './ui/LinearPrimitives';
 
 const TIMEFRAMES: TimeframeFilter[] = ['1M', '3M', '6M', '1Y', 'ALL'];
 
@@ -106,7 +107,7 @@ export function MeasurementsSection() {
     }
 
     if (Object.keys(values).length === 0) {
-      setFormError('Enter at least one measurement value before saving.');
+      setFormError('Enter at least one measurement value before saving');
       return;
     }
 
@@ -124,114 +125,109 @@ export function MeasurementsSection() {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-end justify-between gap-3 border-b border-[#000000] dark:border-[#FFFFFF] pb-3">
+    <div className="space-y-8">
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--border-hairline)] pb-4">
         <div>
-          <p className="font-mono text-[10px] font-bold tracking-[0.12em] uppercase text-[#737373]">
-            BIOMETRICS // 15 METRICS
+          <h2 className="text-base font-semibold text-[var(--ink-primary)]">
+            Body measurements
+          </h2>
+          <p className="mt-1 text-xs text-[var(--ink-secondary)]">
+            Bodyweight, body fat, and circumference trends
           </p>
-          <h3 className="mt-0.5 text-base font-bold text-[#000000] dark:text-[#FFFFFF]">
-            Body Measurements
-          </h3>
         </div>
         <button
           type="button"
           onClick={() => openLogModal()}
-          className="mech-press inline-flex min-h-[40px] items-center gap-2 rounded-[2px] border border-[#000000] dark:border-[#FFFFFF] bg-[#000000] dark:bg-[#FFFFFF] px-4 font-mono text-[11px] font-bold uppercase tracking-[0.06em] text-[#FFFFFF] dark:text-[#000000] hover:bg-[#262626] dark:hover:bg-[#E5E5E5] whitespace-nowrap"
+          className="calm-press btn-primary inline-flex h-9 items-center gap-2 px-4 text-sm font-medium whitespace-nowrap"
         >
-          <Plus className="h-3.5 w-3.5" />
-          Log Measurements
+          <Plus className="h-4 w-4 stroke-[1.5]" />
+          Log measurements
         </button>
       </div>
 
-      {/* Main Split: Metric Selector + Trend Chart */}
-      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[290px_1fr]">
-        {/* Metric Selector List */}
-        <div className="border border-[#E5E5E5] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#0A0A0A]">
-          <div className="max-h-[380px] divide-y divide-[#E5E5E5] dark:divide-[#262626] overflow-y-auto">
-            {MEASUREMENT_FIELDS.map((field) => {
-              const latest = latestByKey.get(field.key);
-              const u = getMeasurementUnitLabel(field.kind, weightUnit, measurementUnit);
-              const isSelected = field.key === selectedMetric;
-              return (
-                <button
-                  key={field.key}
-                  type="button"
-                  onClick={() => setSelectedMetric(field.key)}
-                  className={`mech-press flex min-h-[42px] w-full items-center justify-between px-3.5 py-2 text-left ${
-                    isSelected
-                      ? 'bg-[#000000] dark:bg-[#FFFFFF] text-[#FFFFFF] dark:text-[#000000]'
-                      : 'text-[#000000] dark:text-[#FFFFFF] hover:bg-[#F5F5F5] dark:hover:bg-[#141414]'
+      {/* Split: De-boxed Metric Selector + Matte Sand Trend Chart */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[260px_1fr]">
+        {/* Metric Selector List directly on canvas */}
+        <div className="max-h-[380px] divide-y divide-[var(--border-hairline)] overflow-y-auto pr-1">
+          {MEASUREMENT_FIELDS.map((field) => {
+            const latest = latestByKey.get(field.key);
+            const u = getMeasurementUnitLabel(field.kind, weightUnit, measurementUnit);
+            const isSelected = field.key === selectedMetric;
+            return (
+              <button
+                key={field.key}
+                type="button"
+                onClick={() => setSelectedMetric(field.key)}
+                className={`calm-press flex min-h-[44px] w-full items-center justify-between rounded-lg px-3 py-2 text-left transition-colors ${
+                  isSelected
+                    ? 'status-tick status-tick-sand bg-[var(--surface-active)] text-[var(--ink-primary)]'
+                    : 'text-[var(--ink-secondary)] hover:bg-[var(--surface-hover)] hover:text-[var(--ink-primary)]'
+                }`}
+              >
+                <span className="text-xs font-medium">{field.label}</span>
+                <span
+                  className={`font-mono text-xs tabular-nums ${
+                    isSelected ? 'font-semibold text-[var(--ink-primary)]' : 'text-[var(--ink-muted)]'
                   }`}
                 >
-                  <span className="text-xs font-semibold">{field.label}</span>
-                  <span
-                    className={`font-mono text-xs font-bold tabular-nums ${
-                      isSelected ? 'text-[#FFFFFF] dark:text-[#000000]' : 'text-[#737373]'
-                    }`}
-                  >
-                    {latest
-                      ? `${convertMeasurementFromBase(latest.value, field.kind, weightUnit, measurementUnit)} ${u}`
-                      : '—'}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+                  {latest
+                    ? `${convertMeasurementFromBase(latest.value, field.kind, weightUnit, measurementUnit)} ${u}`
+                    : '—'}
+                </span>
+              </button>
+            );
+          })}
         </div>
 
-        {/* Trend Chart */}
-        <div className="hud-frame border border-[#E5E5E5] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#0A0A0A] p-5">
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
+        {/* Trend Chart (Matte interactive chart container) */}
+        <div className="matte-surface p-5 space-y-4">
+          <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <p className="font-mono text-[10px] font-bold tracking-[0.1em] uppercase text-[#737373]">
-                TREND // {activeUnitLabel}
+              <h3 className="text-sm font-semibold text-[var(--ink-primary)]">
+                {activeMeta.label} trend
+              </h3>
+              <p className="mt-1 text-xs text-[var(--ink-muted)]">
+                Measured in {activeUnitLabel}
               </p>
-              <h4 className="mt-0.5 text-base font-bold text-[#000000] dark:text-[#FFFFFF]">
-                {activeMeta.label} Trend
-              </h4>
             </div>
-            <div className="flex items-center border border-[#000000] dark:border-[#FFFFFF] bg-[#FFFFFF] dark:bg-[#0A0A0A]">
-              {TIMEFRAMES.map((tf) => (
-                <button
-                  key={tf}
-                  type="button"
-                  onClick={() => setTimeframe(tf)}
-                  className={`mech-press min-h-[32px] px-2.5 font-mono text-[10px] font-bold uppercase ${
-                    timeframe === tf
-                      ? 'bg-[#000000] dark:bg-[#FFFFFF] text-[#FFFFFF] dark:text-[#000000]'
-                      : 'text-[#737373] hover:text-[#000000] dark:hover:text-[#FFFFFF]'
-                  }`}
-                >
-                  {tf === 'ALL' ? 'All' : tf}
-                </button>
-              ))}
-            </div>
+            <SegmentedControl<TimeframeFilter>
+              value={timeframe}
+              onChange={setTimeframe}
+              layoutId="measurements-tf-pill"
+              size="xs"
+              ariaLabel="Body measurement timeframe"
+              options={TIMEFRAMES.map((tf) => ({
+                value: tf,
+                label: tf === 'ALL' ? 'All' : tf,
+              }))}
+            />
           </div>
 
           <ProgressChart
             data={chartSeries}
             unit={activeUnitLabel}
             mode="line"
-            height={230}
-            emptyMessage={`No ${activeMeta.label.toLowerCase()} entries logged in this timeframe.`}
+            tone="sand"
+            height={232}
+            emptyMessage={`No ${activeMeta.label.toLowerCase()} entries logged in range`}
           />
         </div>
       </div>
 
-      {/* Entry History List */}
-      <div className="border border-[#E5E5E5] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#0A0A0A]">
-        <div className="border-b border-[#E5E5E5] dark:border-[#262626] bg-[#F5F5F5] dark:bg-[#141414] px-4 py-2.5">
-          <h4 className="font-mono text-[11px] font-bold uppercase tracking-[0.08em] text-[#000000] dark:text-[#FFFFFF]">
-            MEASUREMENT LOG ({sortedEntries.length})
-          </h4>
+      {/* De-boxed Entry History List */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between border-b border-[var(--border-hairline)] pb-3">
+          <h3 className="text-sm font-semibold text-[var(--ink-primary)]">Measurement log</h3>
+          <span className="font-mono text-xs tabular-nums text-[var(--ink-muted)]">
+            {sortedEntries.length} {sortedEntries.length === 1 ? 'entry' : 'entries'}
+          </span>
         </div>
         {sortedEntries.length === 0 ? (
-          <p className="px-4 py-8 text-center font-mono text-xs text-[#737373]">
-            No body measurements logged yet. Click &ldquo;Log Measurements&rdquo; to record your baseline.
+          <p className="py-10 text-center text-sm text-[var(--ink-muted)]">
+            No body measurements logged yet
           </p>
         ) : (
-          <div className="divide-y divide-[#E5E5E5] dark:divide-[#262626]">
+          <div className="divide-y divide-[var(--border-hairline)]">
             {sortedEntries.map((entry) => {
               const summaryPairs = MEASUREMENT_FIELDS.filter(
                 (f) => typeof entry.values[f.key] === 'number'
@@ -249,13 +245,13 @@ export function MeasurementsSection() {
               return (
                 <div
                   key={entry.id}
-                  className="flex flex-col justify-between gap-2 px-4 py-3 sm:flex-row sm:items-center"
+                  className="flex min-h-[52px] flex-col justify-between gap-2 py-3 sm:flex-row sm:items-center"
                 >
                   <div className="min-w-0">
-                    <p className="font-mono text-xs font-bold tabular-nums text-[#000000] dark:text-[#FFFFFF]">
+                    <p className="font-mono text-xs font-semibold tabular-nums text-[var(--ink-primary)]">
                       {entry.date}
                     </p>
-                    <p className="mt-0.5 text-xs leading-relaxed text-[#737373]">
+                    <p className="mt-1 text-xs leading-relaxed text-[var(--ink-secondary)]">
                       {summaryPairs.join(' · ')}
                     </p>
                   </div>
@@ -264,17 +260,17 @@ export function MeasurementsSection() {
                       type="button"
                       onClick={() => openLogModal(entry)}
                       aria-label={`Edit measurement ${entry.date}`}
-                      className="mech-press flex h-9 w-9 items-center justify-center rounded-[2px] text-[#737373] hover:bg-[#F5F5F5] dark:hover:bg-[#141414] hover:text-[#000000] dark:hover:text-[#FFFFFF]"
+                      className="calm-press btn-ghost flex h-8 w-8 items-center justify-center"
                     >
-                      <Pencil className="h-3.5 w-3.5" />
+                      <Pencil className="h-4 w-4 stroke-[1.5]" />
                     </button>
                     <button
                       type="button"
                       onClick={() => setDeletingEntry(entry)}
                       aria-label={`Delete measurement ${entry.date}`}
-                      className="mech-press flex h-9 w-9 items-center justify-center rounded-[2px] text-[#737373] hover:bg-[#000000] dark:hover:bg-[#FFFFFF] hover:text-[#FFFFFF] dark:hover:text-[#000000]"
+                      className="calm-press flex h-8 w-8 items-center justify-center rounded-lg text-[var(--ink-muted)] hover:bg-[var(--accent-clay-tint)] hover:text-[var(--accent-clay)]"
                     >
-                      <Trash2 className="h-3.5 w-3.5" />
+                      <Trash2 className="h-4 w-4 stroke-[1.5]" />
                     </button>
                   </div>
                 </div>
@@ -287,38 +283,41 @@ export function MeasurementsSection() {
       {/* Log / Edit Measurement Modal */}
       {modalOpen && (
         <div
-          className="hud-scrim hud-scrim-enter fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4"
+          className="matte-scrim scrim-enter fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4"
           role="dialog"
           aria-modal="true"
           aria-label={editingEntry ? 'Edit body measurements' : 'Log body measurements'}
         >
           <form
             onSubmit={handleSaveEntry}
-            className="hud-modal-enter hud-frame flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden border-2 border-[#000000] dark:border-[#FFFFFF] bg-[#FFFFFF] dark:bg-[#0A0A0A]"
+            className="matte-modal modal-enter flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden"
           >
-            <div className="flex items-center justify-between border-b border-[#000000] dark:border-[#262626] bg-[#000000] px-5 py-3.5 text-[#FFFFFF]">
+            <div className="flex items-center justify-between border-b border-[var(--border-hairline)] px-5 py-4">
               <div>
-                <p className="font-mono text-[9px] font-bold tracking-[0.12em] uppercase text-[#737373]">
-                  BIOMETRICS // ENTRY
-                </p>
-                <h3 className="text-sm font-bold">
-                  {editingEntry ? 'Edit Measurement Entry' : 'Log Body Measurements'}
+                <h3 className="text-base font-semibold tracking-[-0.01em] text-[var(--ink-primary)]">
+                  {editingEntry ? 'Edit measurement entry' : 'Log body measurements'}
                 </h3>
+                <p className="mt-1 text-xs text-[var(--ink-secondary)]">
+                  Enter any metrics to record for this date
+                </p>
               </div>
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
                 aria-label="Close measurement modal"
-                className="mech-press flex h-9 w-9 items-center justify-center rounded-[2px] border border-[#262626] text-[#FFFFFF] hover:border-[#FFFFFF]"
+                className="calm-press btn-ghost flex h-8 w-8 items-center justify-center"
               >
-                <X className="h-4 w-4" />
+                <X className="h-4 w-4 stroke-[1.5]" />
               </button>
             </div>
 
             <div className="flex-1 space-y-5 overflow-y-auto p-5">
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
-                  <label htmlFor="bm-date" className="mb-1 block font-mono text-[10px] font-bold uppercase tracking-[0.08em] text-[#737373]">
+                  <label
+                    htmlFor="bm-date"
+                    className="mb-2 block text-xs font-medium text-[var(--ink-secondary)]"
+                  >
                     Date
                   </label>
                   <input
@@ -326,27 +325,30 @@ export function MeasurementsSection() {
                     type="date"
                     value={entryDate}
                     onChange={(e) => setEntryDate(e.target.value)}
-                    className="h-10 w-full rounded-[2px] border border-[#D4D4D4] dark:border-[#262626] bg-[#F5F5F5] dark:bg-[#141414] px-3 font-mono text-sm text-[#000000] dark:text-[#FFFFFF] focus:border-[#000000] dark:focus:border-[#FFFFFF] focus:outline-none"
+                    className="matte-input h-10 w-full px-3 font-mono text-sm tabular-nums"
                   />
                 </div>
                 <div>
-                  <label htmlFor="bm-notes" className="mb-1 block font-mono text-[10px] font-bold uppercase tracking-[0.08em] text-[#737373]">
-                    Notes (Optional)
+                  <label
+                    htmlFor="bm-notes"
+                    className="mb-2 block text-xs font-medium text-[var(--ink-secondary)]"
+                  >
+                    Notes (optional)
                   </label>
                   <input
                     id="bm-notes"
                     type="text"
                     value={entryNotes}
                     onChange={(e) => setEntryNotes(e.target.value)}
-                    placeholder="e.g. Fasted morning weigh-in"
-                    className="h-10 w-full rounded-[2px] border border-[#D4D4D4] dark:border-[#262626] bg-[#F5F5F5] dark:bg-[#141414] px-3 text-sm text-[#000000] dark:text-[#FFFFFF] focus:border-[#000000] dark:focus:border-[#FFFFFF] focus:outline-none"
+                    placeholder="e.g. Morning weigh-in"
+                    className="matte-input h-10 w-full px-3 text-sm"
                   />
                 </div>
               </div>
 
               {formError && (
-                <p className="border-l-2 border-[#000000] dark:border-[#FFFFFF] pl-2.5 font-mono text-xs font-bold text-[#000000] dark:text-[#FFFFFF]">
-                  [!] {formError}
+                <p className="rounded-lg border border-[var(--accent-clay-border)] bg-[var(--accent-clay-tint)] px-3 py-2 text-xs font-medium text-[var(--accent-clay)]">
+                  {formError}
                 </p>
               )}
 
@@ -357,9 +359,12 @@ export function MeasurementsSection() {
                     <div key={field.key}>
                       <label
                         htmlFor={`bm-field-${field.key}`}
-                        className="mb-1 block font-mono text-[10px] font-semibold uppercase tracking-[0.06em] text-[#737373]"
+                        className="mb-2 block text-xs font-medium text-[var(--ink-secondary)]"
                       >
-                        {field.label} ({u})
+                        {field.label}{' '}
+                        <span className="font-mono text-[11px] text-[var(--ink-muted)]">
+                          ({u})
+                        </span>
                       </label>
                       <input
                         id={`bm-field-${field.key}`}
@@ -372,7 +377,7 @@ export function MeasurementsSection() {
                           if (formError) setFormError('');
                         }}
                         placeholder="—"
-                        className="h-10 w-full rounded-[2px] border border-[#D4D4D4] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#141414] px-3 font-mono text-sm tabular-nums text-[#000000] dark:text-[#FFFFFF] focus:border-[#000000] dark:focus:border-[#FFFFFF] focus:outline-none"
+                        className="matte-input h-10 w-full px-3 font-mono text-sm tabular-nums"
                       />
                     </div>
                   );
@@ -380,19 +385,19 @@ export function MeasurementsSection() {
               </div>
             </div>
 
-            <div className="flex items-center justify-end gap-2 border-t border-[#E5E5E5] dark:border-[#262626] px-5 py-3.5">
+            <div className="flex items-center justify-end gap-2 border-t border-[var(--border-hairline)] px-5 py-4">
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
-                className="mech-press min-h-[40px] rounded-[2px] border border-[#E5E5E5] dark:border-[#262626] px-4 font-mono text-xs font-bold uppercase tracking-[0.06em] text-[#000000] dark:text-[#FFFFFF] hover:border-[#000000] dark:hover:border-[#FFFFFF]"
+                className="calm-press btn-secondary h-9 px-4 text-sm font-medium whitespace-nowrap"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="mech-press min-h-[40px] rounded-[2px] bg-[#000000] dark:bg-[#FFFFFF] px-5 font-mono text-xs font-bold uppercase tracking-[0.06em] text-[#FFFFFF] dark:text-[#000000]"
+                className="calm-press btn-primary h-9 px-4 text-sm font-medium whitespace-nowrap"
               >
-                Save Entry
+                Save entry
               </button>
             </div>
           </form>
@@ -401,8 +406,8 @@ export function MeasurementsSection() {
 
       <ConfirmDialog
         open={deletingEntry !== null}
-        title="Delete measurement entry?"
-        description={`Remove the measurement log from ${deletingEntry?.date}?`}
+        title="Delete measurement entry"
+        description={`Remove the measurement log from ${deletingEntry?.date}`}
         confirmLabel="Delete"
         destructive
         onCancel={() => setDeletingEntry(null)}

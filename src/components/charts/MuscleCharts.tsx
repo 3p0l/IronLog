@@ -1,4 +1,4 @@
-import React, { useId } from 'react';
+import React from 'react';
 import { MuscleDistributionItem } from '../../utils/calculations';
 
 interface MuscleChartsProps {
@@ -7,16 +7,12 @@ interface MuscleChartsProps {
 }
 
 export function MuscleCharts({ data, viewMode }: MuscleChartsProps) {
-  const stippleId = useId();
-
   if (data.length === 0) {
     return (
-      <div className="hud-dot-matrix flex h-52 flex-col items-center justify-center border border-dashed border-[#D4D4D4] dark:border-[#262626] px-6 text-center">
-        <span className="border border-[#000000] dark:border-[#FFFFFF] bg-[#FFFFFF] dark:bg-[#000000] px-2.5 py-1 font-mono text-[10px] font-bold tracking-[0.1em] uppercase">
-          00 // NO WORKING SETS
-        </span>
-        <p className="mt-2 font-mono text-xs text-[#737373]">
-          Complete working sets in this timeframe to visualize muscle load.
+      <div className="flex h-52 flex-col items-center justify-center rounded-lg border border-dashed border-[var(--border-hairline)] bg-[var(--recessed)] px-6 text-center">
+        <p className="text-sm font-medium text-[var(--ink-primary)]">No working sets in range</p>
+        <p className="mt-1 text-xs text-[var(--ink-secondary)]">
+          Complete working sets to view muscle distribution
         </p>
       </div>
     );
@@ -25,29 +21,28 @@ export function MuscleCharts({ data, viewMode }: MuscleChartsProps) {
   if (viewMode === 'bar') {
     const maxSets = Math.max(...data.map((d) => d.workingSets), 1);
     return (
-      <div className="space-y-3.5">
-        {data.map((item, idx) => {
+      <div className="space-y-3">
+        {data.map((item) => {
           const widthPct = Math.max(4, (item.workingSets / maxSets) * 100);
           return (
-            <div key={item.muscle} className="space-y-1">
+            <div key={item.muscle} className="space-y-2">
               <div className="flex items-baseline justify-between gap-2">
-                <span className="flex items-center gap-2 text-xs font-semibold text-[#000000] dark:text-[#FFFFFF]">
-                  <span className="font-mono text-[10px] text-[#737373] tabular-nums">
-                    {String(idx + 1).padStart(2, '0')}
-                  </span>
-                  <span className="uppercase tracking-[0.04em]">{item.muscle}</span>
+                <span className="text-xs font-medium text-[var(--ink-primary)]">
+                  {item.muscle}
                 </span>
-                <span className="font-mono text-[11px] font-semibold tabular-nums text-[#000000] dark:text-[#FFFFFF]">
-                  {item.workingSets} <span className="text-[#737373]">{item.workingSets === 1 ? 'SET' : 'SETS'} // {item.percentage}%</span>
+                <span className="font-mono text-xs tabular-nums text-[var(--ink-secondary)]">
+                  <span className="font-medium text-[var(--ink-primary)]">
+                    {item.workingSets}
+                  </span>{' '}
+                  {item.workingSets === 1 ? 'set' : 'sets'} · {item.percentage}%
                 </span>
               </div>
-              <div className="h-2.5 w-full border border-[#000000] dark:border-[#FFFFFF] bg-[#FFFFFF] dark:bg-[#000000]">
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-[var(--recessed)]">
                 <div
-                  className="h-full bg-[#000000] dark:bg-[#FFFFFF] transition-[width] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                  className="h-full rounded-full bg-[var(--accent-steel)] transition-[width] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)]"
                   style={{ width: `${widthPct}%` }}
                 />
               </div>
-              <div className="hud-ruler h-1.5 w-full text-[#D4D4D4] dark:text-[#262626]" aria-hidden="true" />
             </div>
           );
         })}
@@ -55,7 +50,7 @@ export function MuscleCharts({ data, viewMode }: MuscleChartsProps) {
     );
   }
 
-  // Monochrome Radar Visualization (up to top 8 muscle groups)
+  // Smooth Radar Visualization (up to top 8 muscle groups)
   const radarItems = data.slice(0, 8);
   while (radarItems.length < 3) {
     radarItems.push({ muscle: 'Full Body', workingSets: 0, percentage: 0 });
@@ -84,20 +79,13 @@ export function MuscleCharts({ data, viewMode }: MuscleChartsProps) {
     .join(' ');
 
   return (
-    <div className="flex flex-col items-center justify-center">
+    <div className="flex flex-col items-center justify-center py-2">
       <svg
         viewBox={`0 0 ${size} ${size}`}
-        className="h-[270px] w-full max-w-[300px] overflow-visible"
+        className="h-[268px] w-full max-w-[300px] overflow-visible"
         role="img"
-        aria-label="Monochrome muscle group distribution radar chart"
+        aria-label="Muscle group distribution radar chart"
       >
-        <defs>
-          <pattern id={stippleId} width="6" height="6" patternUnits="userSpaceOnUse">
-            <circle cx="1.5" cy="1.5" r="0.9" className="fill-[#000000]/22 dark:fill-[#FFFFFF]/24" />
-          </pattern>
-        </defs>
-
-        {/* Concentric dashed grid rings */}
         {rings.map((r, rIdx) => (
           <polygon
             key={r}
@@ -108,13 +96,11 @@ export function MuscleCharts({ data, viewMode }: MuscleChartsProps) {
               })
               .join(' ')}
             fill="none"
-            className={rIdx === rings.length - 1 ? 'stroke-[#000000] dark:stroke-[#FFFFFF]' : 'stroke-[#E5E5E5] dark:stroke-[#262626]'}
+            stroke={rIdx === rings.length - 1 ? 'var(--border-focus)' : 'var(--chart-grid)'}
             strokeWidth={1}
-            strokeDasharray={rIdx === rings.length - 1 ? undefined : '2 3'}
           />
         ))}
 
-        {/* Axis spokes */}
         {radarItems.map((_, idx) => {
           const outer = getPoint(idx, 1);
           return (
@@ -124,39 +110,32 @@ export function MuscleCharts({ data, viewMode }: MuscleChartsProps) {
               y1={cy}
               x2={outer.x}
               y2={outer.y}
-              className="stroke-[#E5E5E5] dark:stroke-[#262626]"
+              stroke="var(--chart-grid)"
               strokeWidth={1}
             />
           );
         })}
 
-        {/* Data polygon */}
         <polygon
           points={polygonPoints}
-          fill={`url(#${stippleId})`}
-          className="stroke-[#000000] dark:stroke-[#FFFFFF]"
-          strokeWidth={2}
-          strokeLinejoin="miter"
+          fill="var(--accent-steel-tint)"
+          stroke="var(--accent-steel)"
+          strokeWidth={1.75}
+          strokeLinejoin="round"
         />
 
-        {/* Square vertex markers + mono labels */}
         {radarItems.map((item, idx) => {
           const pt = getPoint(idx, item.workingSets / maxSets);
           const lbl = getPoint(idx, 1.24);
           return (
             <g key={`${item.muscle}-${idx}`}>
-              <rect
-                x={pt.x - 3}
-                y={pt.y - 3}
-                width={6}
-                height={6}
-                className="fill-[#000000] dark:fill-[#FFFFFF]"
-              />
+              <circle cx={pt.x} cy={pt.y} r={3} fill="var(--accent-steel)" />
               <text
                 x={lbl.x}
                 y={lbl.y + 3}
                 textAnchor="middle"
-                className="fill-[#000000] dark:fill-[#FFFFFF] font-mono text-[9px] font-semibold uppercase"
+                fill="var(--ink-secondary)"
+                className="text-[10px] font-medium"
               >
                 {item.muscle}
               </text>

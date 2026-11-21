@@ -8,6 +8,7 @@ import {
   resolveSetWeightUnit,
 } from '../utils/calculations';
 import { ExercisePickerModal } from './ExercisePickerModal';
+import { SegmentedControl } from './ui/LinearPrimitives';
 
 interface RoutineEditorModalProps {
   open: boolean;
@@ -117,7 +118,9 @@ export function RoutineEditorModal({
   };
 
   const removeExercise = (id: string) => {
-    setExercises((prev) => prev.filter((e) => e.id !== id).map((e, i) => ({ ...e, sortOrder: i })));
+    setExercises((prev) =>
+      prev.filter((e) => e.id !== id).map((e, i) => ({ ...e, sortOrder: i }))
+    );
   };
 
   const addSet = (reId: string) => {
@@ -146,7 +149,9 @@ export function RoutineEditorModal({
 
   const removeSet = (reId: string, setId: string) => {
     setExercises((prev) =>
-      prev.map((e) => (e.id === reId ? { ...e, sets: e.sets.filter((s) => s.id !== setId) } : e))
+      prev.map((e) =>
+        e.id === reId ? { ...e, sets: e.sets.filter((s) => s.id !== setId) } : e
+      )
     );
   };
 
@@ -167,7 +172,12 @@ export function RoutineEditorModal({
   const updateSetField = (
     reId: string,
     setId: string,
-    patch: Partial<{ setType: SetType; weightKg: number | null; weightUnit: WeightUnit; reps: number | null }>
+    patch: Partial<{
+      setType: SetType;
+      weightKg: number | null;
+      weightUnit: WeightUnit;
+      reps: number | null;
+    }>
   ) => {
     setExercises((prev) =>
       prev.map((e) =>
@@ -181,7 +191,7 @@ export function RoutineEditorModal({
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) {
-      setError('Please enter a routine title.');
+      setError('Enter a routine title');
       return;
     }
     saveRoutine({
@@ -197,53 +207,53 @@ export function RoutineEditorModal({
   return (
     <>
       <div
-        className="hud-scrim hud-scrim-enter fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4"
+        className="matte-scrim scrim-enter fixed inset-0 z-50 flex items-end justify-center sm:items-center sm:p-4"
         role="dialog"
         aria-modal="true"
         aria-label={editingRoutine ? 'Edit routine' : 'Create routine'}
       >
         <form
           onSubmit={handleSave}
-          className="hud-modal-enter hud-frame flex h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-[2px] border-2 border-[#000000] dark:border-[#FFFFFF] bg-[#FFFFFF] dark:bg-[#0A0A0A] sm:h-[88vh]"
+          className="matte-modal modal-enter flex h-[92vh] w-full max-w-3xl flex-col overflow-hidden sm:h-[88vh]"
         >
-          {/* Pitch-Black Header */}
-          <div className="flex items-center justify-between border-b border-[#262626] bg-[#000000] px-5 py-3.5 text-[#FFFFFF]">
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-[var(--border-hairline)] px-5 py-4">
             <div>
-              <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.14em] text-[#A3A3A3]">
-                PROGRAM EDITOR // TEMPLATE
-              </p>
-              <h2 className="mt-0.5 text-base font-bold tracking-tight text-[#FFFFFF]">
-                {editingRoutine ? 'Edit Routine' : 'New Routine'}
+              <h2 className="text-base font-semibold tracking-[-0.01em] text-[var(--ink-primary)]">
+                {editingRoutine ? 'Edit routine' : 'New routine'}
               </h2>
+              <p className="mt-1 text-xs text-[var(--ink-secondary)]">
+                Configure exercises, targets, and per-set kg/lbs units
+              </p>
             </div>
             <div className="flex items-center gap-2">
               <button
                 type="submit"
-                className="mech-press min-h-[38px] rounded-[2px] border border-[#FFFFFF] bg-[#FFFFFF] px-4 font-mono text-xs font-bold uppercase tracking-wider text-[#000000] hover:bg-[#E5E5E5]"
+                className="calm-press btn-primary h-9 px-4 text-sm font-medium whitespace-nowrap"
               >
-                Save Routine
+                Save routine
               </button>
               <button
                 type="button"
                 onClick={onClose}
                 aria-label="Close routine editor"
-                className="mech-press flex h-10 w-10 items-center justify-center rounded-[2px] border border-[#262626] bg-[#0A0A0A] text-[#FFFFFF] hover:border-[#FFFFFF]"
+                className="calm-press btn-ghost flex h-8 w-8 items-center justify-center"
               >
-                <X className="h-4 w-4" />
+                <X className="h-4 w-4 stroke-[1.5]" />
               </button>
             </div>
           </div>
 
-          <div className="flex-1 space-y-4 overflow-y-auto p-5 bg-[#F5F5F5] dark:bg-[#000000]">
-            {/* Meta card */}
-            <div className="rounded-[2px] border border-[#E5E5E5] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#0A0A0A] p-4 space-y-3">
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="flex-1 space-y-5 overflow-y-auto bg-[var(--canvas)] p-5">
+            {/* De-boxed Meta Fields */}
+            <div className="space-y-4 border-b border-[var(--border-hairline)] pb-5">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <div>
                   <label
                     htmlFor="routine-title"
-                    className="mb-1 block font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-[#525252] dark:text-[#A3A3A3]"
+                    className="mb-2 block text-xs font-medium text-[var(--ink-secondary)]"
                   >
-                    Routine Title
+                    Routine title
                   </label>
                   <input
                     id="routine-title"
@@ -254,19 +264,17 @@ export function RoutineEditorModal({
                       if (error) setError('');
                     }}
                     placeholder="e.g. Push Day Hypertrophy"
-                    className="h-10 w-full rounded-[2px] border border-[#000000] dark:border-[#FFFFFF] bg-[#FFFFFF] dark:bg-[#000000] px-3 text-sm font-medium text-[#000000] dark:text-[#FFFFFF] placeholder-[#737373] focus:outline-none"
+                    className="matte-input h-10 w-full px-3 text-sm"
                   />
                   {error && (
-                    <p className="mt-1 font-mono text-xs font-bold text-[#000000] dark:text-[#FFFFFF]">
-                      [!] {error}
-                    </p>
+                    <p className="mt-2 text-xs font-medium text-[var(--accent-clay)]">{error}</p>
                   )}
                 </div>
 
                 <div>
                   <label
                     htmlFor="routine-folder"
-                    className="mb-1 block font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-[#525252] dark:text-[#A3A3A3]"
+                    className="mb-2 block text-xs font-medium text-[var(--ink-secondary)]"
                   >
                     Folder
                   </label>
@@ -274,7 +282,7 @@ export function RoutineEditorModal({
                     id="routine-folder"
                     value={folderId ?? ''}
                     onChange={(e) => setFolderId(e.target.value || null)}
-                    className="h-10 w-full rounded-[2px] border border-[#E5E5E5] dark:border-[#262626] bg-[#F5F5F5] dark:bg-[#141414] px-3 text-sm text-[#000000] dark:text-[#FFFFFF] focus:border-[#000000] dark:focus:border-[#FFFFFF] focus:outline-none"
+                    className="matte-input h-10 w-full px-3 text-sm"
                   >
                     <option value="">Uncategorized</option>
                     {db.folders.map((f) => (
@@ -289,79 +297,59 @@ export function RoutineEditorModal({
               <div>
                 <label
                   htmlFor="routine-notes"
-                  className="mb-1 block font-mono text-[11px] font-bold uppercase tracking-[0.1em] text-[#525252] dark:text-[#A3A3A3]"
+                  className="mb-2 block text-xs font-medium text-[var(--ink-secondary)]"
                 >
-                  Routine Notes
+                  Routine notes
                 </label>
                 <input
                   id="routine-notes"
                   type="text"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Optional focus cues or split notes..."
-                  className="h-10 w-full rounded-[2px] border border-[#E5E5E5] dark:border-[#262626] bg-[#F5F5F5] dark:bg-[#141414] px-3 text-sm text-[#000000] dark:text-[#FFFFFF] placeholder-[#737373] focus:border-[#000000] dark:focus:border-[#FFFFFF] focus:outline-none"
+                  placeholder="Optional cues or split notes"
+                  className="matte-input h-10 w-full px-3 text-sm"
                 />
               </div>
             </div>
 
             {/* Exercise list */}
             {exercises.length === 0 ? (
-              <div className="hud-dot-matrix rounded-[2px] border border-dashed border-[#000000] dark:border-[#262626] px-6 py-10 text-center">
-                <p className="inline-block bg-[#FFFFFF] dark:bg-[#0A0A0A] border border-[#E5E5E5] dark:border-[#262626] px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-[#737373]">
-                  00 // No exercises added yet. Build your routine below.
-                </p>
+              <div className="py-10 text-center">
+                <p className="text-sm text-[var(--ink-muted)]">No exercises added yet</p>
               </div>
             ) : (
               exercises.map((re, idx) => {
                 const exDef = exerciseMap.get(re.exerciseId);
                 const exUnit = re.weightUnit ?? unit;
                 const hasMixed =
-                  new Set(re.sets.map((s) => resolveSetWeightUnit(s.weightUnit, re.weightUnit, unit))).size > 1;
+                  new Set(
+                    re.sets.map((s) => resolveSetWeightUnit(s.weightUnit, re.weightUnit, unit))
+                  ).size > 1;
                 return (
-                  <div
-                    key={re.id}
-                    className="hud-frame rounded-[2px] border border-[#000000] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#0A0A0A] p-4 space-y-3"
-                  >
-                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#E5E5E5] dark:border-[#262626] pb-3">
+                  <div key={re.id} className="matte-surface p-4 space-y-3">
+                    <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[var(--border-hairline)] pb-3">
                       <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="font-mono text-[11px] font-bold text-[#737373]">
-                            {String(idx + 1).padStart(2, '0')} //
-                          </span>
-                          <h3 className="truncate text-sm font-bold text-[#000000] dark:text-[#FFFFFF]">
-                            {exDef?.name ?? 'Unknown Exercise'}
-                          </h3>
-                        </div>
-                        <p className="mt-0.5 font-mono text-[11px] uppercase tracking-wider text-[#737373]">
-                          {exDef?.primaryMuscle} · REST {re.restSeconds}S
-                          {hasMixed ? ' · MIXED KG/LBS' : ''}
+                        <h3 className="truncate text-sm font-semibold text-[var(--ink-primary)]">
+                          {exDef?.name ?? 'Unknown exercise'}
+                        </h3>
+                        <p className="mt-1 text-xs text-[var(--ink-secondary)]">
+                          {exDef?.primaryMuscle} · Rest{' '}
+                          <span className="font-mono tabular-nums">{re.restSeconds}s</span>
+                          {hasMixed ? ' · Mixed kg/lbs' : ''}
                         </p>
                       </div>
-                      <div className="flex items-center gap-1.5 shrink-0">
-                        <div
-                          className="flex items-center rounded-[2px] border border-[#000000] dark:border-[#FFFFFF] bg-[#FFFFFF] dark:bg-[#000000] p-0.5"
-                          role="group"
-                          aria-label={`${exDef?.name ?? 'Exercise'} unit`}
-                        >
-                          {(['kg', 'lbs'] as const).map((u) => {
-                            const active = !hasMixed && exUnit === u;
-                            return (
-                              <button
-                                key={u}
-                                type="button"
-                                onClick={() => setExerciseUnit(re.id, u)}
-                                aria-pressed={active}
-                                className={`mech-press h-7 rounded-[2px] px-2 font-mono text-[10px] font-bold uppercase tracking-wider transition-colors ${
-                                  active
-                                    ? 'bg-[#000000] dark:bg-[#FFFFFF] text-[#FFFFFF] dark:text-[#000000]'
-                                    : 'text-[#737373] hover:text-[#000000] dark:hover:text-[#FFFFFF]'
-                                }`}
-                              >
-                                {u}
-                              </button>
-                            );
-                          })}
-                        </div>
+                      <div className="flex flex-wrap items-center gap-2 shrink-0">
+                        <SegmentedControl<WeightUnit>
+                          value={hasMixed ? null : exUnit}
+                          onChange={(u) => setExerciseUnit(re.id, u)}
+                          layoutId={`routine-ex-unit-${re.id}`}
+                          size="xs"
+                          ariaLabel={`${exDef?.name ?? 'Exercise'} unit`}
+                          options={[
+                            { value: 'kg', label: 'kg' },
+                            { value: 'lbs', label: 'lbs' },
+                          ]}
+                        />
                         <select
                           value={re.restSeconds}
                           onChange={(e) =>
@@ -374,7 +362,7 @@ export function RoutineEditorModal({
                             )
                           }
                           aria-label="Exercise rest timer"
-                          className="h-8 rounded-[2px] border border-[#E5E5E5] dark:border-[#262626] bg-[#F5F5F5] dark:bg-[#141414] px-2 font-mono text-xs text-[#000000] dark:text-[#FFFFFF]"
+                          className="matte-input h-8 bg-[var(--recessed)] px-2 font-mono text-xs tabular-nums"
                         >
                           {[30, 45, 60, 75, 90, 120, 150, 180, 240, 300].map((sec) => (
                             <option key={sec} value={sec}>
@@ -387,35 +375,35 @@ export function RoutineEditorModal({
                           onClick={() => moveExercise(idx, 'up')}
                           disabled={idx === 0}
                           aria-label="Move exercise up"
-                          className="mech-press flex h-8 w-8 items-center justify-center rounded-[2px] border border-[#E5E5E5] dark:border-[#262626] text-[#000000] dark:text-[#FFFFFF] hover:border-[#000000] dark:hover:border-[#FFFFFF] disabled:opacity-25"
+                          className="calm-press btn-ghost flex h-8 w-8 items-center justify-center disabled:opacity-25"
                         >
-                          <ArrowUp className="h-3.5 w-3.5" />
+                          <ArrowUp className="h-4 w-4 stroke-[1.5]" />
                         </button>
                         <button
                           type="button"
                           onClick={() => moveExercise(idx, 'down')}
                           disabled={idx === exercises.length - 1}
                           aria-label="Move exercise down"
-                          className="mech-press flex h-8 w-8 items-center justify-center rounded-[2px] border border-[#E5E5E5] dark:border-[#262626] text-[#000000] dark:text-[#FFFFFF] hover:border-[#000000] dark:hover:border-[#FFFFFF] disabled:opacity-25"
+                          className="calm-press btn-ghost flex h-8 w-8 items-center justify-center disabled:opacity-25"
                         >
-                          <ArrowDown className="h-3.5 w-3.5" />
+                          <ArrowDown className="h-4 w-4 stroke-[1.5]" />
                         </button>
                         <button
                           type="button"
                           onClick={() => removeExercise(re.id)}
                           aria-label="Remove exercise"
-                          className="mech-press flex h-8 w-8 items-center justify-center rounded-[2px] border border-[#E5E5E5] dark:border-[#262626] text-[#000000] dark:text-[#FFFFFF] hover:bg-[#000000] hover:text-[#FFFFFF] dark:hover:bg-[#FFFFFF] dark:hover:text-[#000000]"
+                          className="calm-press flex h-8 w-8 items-center justify-center rounded-lg text-[var(--ink-muted)] hover:bg-[var(--accent-clay-tint)] hover:text-[var(--accent-clay)]"
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
+                          <Trash2 className="h-4 w-4 stroke-[1.5]" />
                         </button>
                       </div>
                     </div>
 
                     {/* Sets Table */}
                     <div className="space-y-2">
-                      <div className="grid grid-cols-[44px_1.2fr_0.9fr_36px] gap-2 px-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-[#737373]">
-                        <span>Set</span>
-                        <span>Target Weight</span>
+                      <div className="grid grid-cols-[40px_1.2fr_0.9fr_36px] gap-2 px-1 text-xs font-medium text-[var(--ink-muted)]">
+                        <span className="text-center">Set</span>
+                        <span>Target weight</span>
                         <span>Reps</span>
                         <span />
                       </div>
@@ -424,20 +412,22 @@ export function RoutineEditorModal({
                         return (
                           <div
                             key={s.id}
-                            className="grid grid-cols-[44px_1.2fr_0.9fr_36px] items-center gap-2"
+                            className="grid grid-cols-[40px_1.2fr_0.9fr_36px] items-center gap-2"
                           >
                             <button
                               type="button"
-                              onClick={() => updateSetField(re.id, s.id, { setType: nextSetType(s.setType) })}
+                              onClick={() =>
+                                updateSetField(re.id, s.id, { setType: nextSetType(s.setType) })
+                              }
                               title="Cycle set type (Normal / Warmup / Drop / Failure)"
-                              className={`mech-press h-10 rounded-[2px] font-mono text-xs font-bold ${
+                              className={`calm-press h-9 rounded-[6px] font-mono text-xs font-medium ${
                                 s.setType === 'warmup'
-                                  ? 'border border-dashed border-[#000000] dark:border-[#FFFFFF] bg-[#FFFFFF] dark:bg-[#0A0A0A] text-[#000000] dark:text-[#FFFFFF]'
+                                  ? 'border border-dashed border-[var(--border-focus)] bg-transparent text-[var(--ink-secondary)]'
                                   : s.setType === 'drop'
-                                  ? 'hud-hatch border border-[#000000] dark:border-[#FFFFFF] text-[#000000] dark:text-[#FFFFFF]'
+                                  ? 'border border-[var(--accent-steel-border)] bg-[var(--accent-steel-tint)] text-[var(--accent-steel)]'
                                   : s.setType === 'failure'
-                                  ? 'border-2 border-[#000000] dark:border-[#FFFFFF] bg-[#FFFFFF] dark:bg-[#0A0A0A] text-[#000000] dark:text-[#FFFFFF]'
-                                  : 'border border-[#E5E5E5] dark:border-[#262626] bg-[#F5F5F5] dark:bg-[#141414] text-[#000000] dark:text-[#FFFFFF]'
+                                  ? 'border border-[var(--accent-clay-border)] bg-[var(--accent-clay-tint)] text-[var(--accent-clay)]'
+                                  : 'border border-[var(--border-hairline)] bg-[var(--recessed)] text-[var(--ink-secondary)]'
                               }`}
                             >
                               {s.setType === 'warmup'
@@ -448,7 +438,7 @@ export function RoutineEditorModal({
                                 ? 'F'
                                 : sIdx + 1}
                             </button>
-                            <div className="flex h-10 w-full items-stretch overflow-hidden rounded-[2px] border border-[#E5E5E5] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#000000] focus-within:border-[#000000] dark:focus-within:border-[#FFFFFF]">
+                            <div className="flex h-9 w-full items-stretch overflow-hidden rounded-lg border border-[var(--border-hairline)] bg-[var(--recessed)] transition-colors focus-within:border-[var(--accent-steel)]">
                               <input
                                 type="number"
                                 step="any"
@@ -457,13 +447,14 @@ export function RoutineEditorModal({
                                 onChange={(e) => {
                                   const raw = e.target.value;
                                   updateSetField(re.id, s.id, {
-                                    weightKg: raw === '' ? null : convertWeightToKg(Number(raw), setUnit),
+                                    weightKg:
+                                      raw === '' ? null : convertWeightToKg(Number(raw), setUnit),
                                     weightUnit: setUnit,
                                   });
                                 }}
                                 placeholder="—"
                                 aria-label={`${exDef?.name ?? 'Exercise'} set ${sIdx + 1} target weight`}
-                                className="min-w-0 flex-1 bg-transparent px-2.5 font-mono text-sm tabular-nums text-[#000000] dark:text-[#FFFFFF] focus:outline-none"
+                                className="min-w-0 flex-1 bg-transparent px-3 font-mono text-sm tabular-nums text-[var(--ink-primary)] placeholder-[var(--ink-muted)] focus:outline-none"
                               />
                               <button
                                 type="button"
@@ -473,10 +464,10 @@ export function RoutineEditorModal({
                                   })
                                 }
                                 aria-label={`${exDef?.name ?? 'Exercise'} set ${sIdx + 1} unit ${setUnit}`}
-                                className={`mech-press flex w-10 shrink-0 items-center justify-center border-l border-[#E5E5E5] dark:border-[#262626] font-mono text-[10px] font-bold uppercase tracking-wider transition-colors ${
+                                className={`calm-press flex w-10 shrink-0 items-center justify-center border-l border-[var(--border-hairline)] font-mono text-[11px] font-medium transition-colors ${
                                   setUnit === 'lbs'
-                                    ? 'bg-[#000000] dark:bg-[#FFFFFF] text-[#FFFFFF] dark:text-[#000000]'
-                                    : 'bg-[#F5F5F5] dark:bg-[#141414] text-[#525252] dark:text-[#A3A3A3] hover:text-[#000000] dark:hover:text-[#FFFFFF]'
+                                    ? 'bg-[var(--surface-active)] text-[var(--ink-primary)]'
+                                    : 'bg-[var(--surface)] text-[var(--ink-secondary)] hover:text-[var(--ink-primary)]'
                                 }`}
                               >
                                 {setUnit}
@@ -489,20 +480,21 @@ export function RoutineEditorModal({
                               onChange={(e) => {
                                 const raw = e.target.value;
                                 updateSetField(re.id, s.id, {
-                                  reps: raw === '' ? null : Math.max(0, Math.round(Number(raw))),
+                                  reps:
+                                    raw === '' ? null : Math.max(0, Math.round(Number(raw))),
                                 });
                               }}
                               placeholder="—"
                               aria-label={`${exDef?.name ?? 'Exercise'} set ${sIdx + 1} target reps`}
-                              className="h-10 w-full rounded-[2px] border border-[#E5E5E5] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#000000] px-3 font-mono text-sm tabular-nums text-[#000000] dark:text-[#FFFFFF] focus:border-[#000000] dark:focus:border-[#FFFFFF] focus:outline-none"
+                              className="matte-input h-9 w-full bg-[var(--recessed)] px-3 font-mono text-sm tabular-nums"
                             />
                             <button
                               type="button"
                               onClick={() => removeSet(re.id, s.id)}
                               aria-label={`Remove set ${sIdx + 1}`}
-                              className="mech-press flex h-10 w-9 items-center justify-center rounded-[2px] text-[#737373] hover:bg-[#000000] hover:text-[#FFFFFF] dark:hover:bg-[#FFFFFF] dark:hover:text-[#000000]"
+                              className="calm-press flex h-9 w-9 items-center justify-center rounded-lg text-[var(--ink-muted)] hover:bg-[var(--accent-clay-tint)] hover:text-[var(--accent-clay)]"
                             >
-                              <Trash2 className="h-3.5 w-3.5" />
+                              <Trash2 className="h-4 w-4 stroke-[1.5]" />
                             </button>
                           </div>
                         );
@@ -512,10 +504,10 @@ export function RoutineEditorModal({
                     <button
                       type="button"
                       onClick={() => addSet(re.id)}
-                      className="mech-press flex h-9 w-full items-center justify-center gap-1.5 rounded-[2px] border border-dashed border-[#000000] dark:border-[#525252] bg-[#F5F5F5] dark:bg-[#141414] font-mono text-[11px] font-bold uppercase tracking-wider text-[#000000] dark:text-[#FFFFFF] hover:bg-[#000000] hover:text-[#FFFFFF] dark:hover:bg-[#FFFFFF] dark:hover:text-[#000000]"
+                      className="calm-press flex h-9 w-full items-center justify-center gap-2 rounded-lg border border-dashed border-[var(--border-hairline)] bg-transparent text-xs font-medium text-[var(--ink-secondary)] hover:border-[var(--border-focus)] hover:bg-[var(--surface-hover)] hover:text-[var(--ink-primary)]"
                     >
-                      <Plus className="h-3.5 w-3.5" />
-                      Add Set
+                      <Plus className="h-4 w-4 stroke-[1.5]" />
+                      Add set
                     </button>
                   </div>
                 );
@@ -525,10 +517,10 @@ export function RoutineEditorModal({
             <button
               type="button"
               onClick={() => setPickerOpen(true)}
-              className="mech-press flex h-12 w-full items-center justify-center gap-2 rounded-[2px] border border-[#000000] dark:border-[#FFFFFF] bg-[#000000] dark:bg-[#FFFFFF] font-mono text-xs font-bold uppercase tracking-widest text-[#FFFFFF] dark:text-[#000000] hover:bg-[#1A1A1A] dark:hover:bg-[#E5E5E5]"
+              className="calm-press btn-primary flex h-11 w-full items-center justify-center gap-2 text-sm font-medium whitespace-nowrap"
             >
-              <Plus className="h-4 w-4" />
-              Add Exercise
+              <Plus className="h-4 w-4 stroke-[1.5]" />
+              Add exercise
             </button>
           </div>
         </form>

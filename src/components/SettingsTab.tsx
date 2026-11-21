@@ -19,6 +19,7 @@ import {
 } from '../utils/hevyCsv';
 import { downloadTextFile } from '../utils/feedback';
 import { ConfirmDialog } from './ConfirmDialog';
+import { SegmentedControl, ToggleSwitch } from './ui/LinearPrimitives';
 
 export function SettingsTab() {
   const {
@@ -57,7 +58,7 @@ export function SettingsTab() {
       setHevyPreview(parsed);
     } catch (err) {
       setHevyPreview(null);
-      setImportError(err instanceof Error ? err.message : 'Unable to parse CSV file.');
+      setImportError(err instanceof Error ? err.message : 'Unable to parse CSV file');
     }
     e.target.value = '';
   };
@@ -68,7 +69,7 @@ export function SettingsTab() {
       const parsed = parseHevyCsv(SAMPLE_HEVY_CSV, db.exercises);
       setHevyPreview(parsed);
     } catch (err) {
-      setImportError(err instanceof Error ? err.message : 'Sample parse failed.');
+      setImportError(err instanceof Error ? err.message : 'Sample parse failed');
     }
   };
 
@@ -76,7 +77,7 @@ export function SettingsTab() {
     if (!hevyPreview) return;
     importWorkoutsAndExercises(hevyPreview.workouts, hevyPreview.newExercises);
     showToast(
-      `Imported ${hevyPreview.workouts.length} workouts (${hevyPreview.totalSets} sets) and ${hevyPreview.newExercises.length} new exercises.`
+      `Imported ${hevyPreview.workouts.length} workouts (${hevyPreview.totalSets} sets) and ${hevyPreview.newExercises.length} new exercises`
     );
     setHevyPreview(null);
   };
@@ -85,7 +86,7 @@ export function SettingsTab() {
     const csv = exportWorkoutsToCsv(db.workouts, db.exercises);
     const dateStamp = new Date().toISOString().slice(0, 10);
     downloadTextFile(`ironlog-workouts-${dateStamp}.csv`, csv, 'text/csv;charset=utf-8');
-    showToast('Workout history CSV exported.');
+    showToast('Workout history CSV exported');
   };
 
   const handleExportJson = () => {
@@ -95,7 +96,7 @@ export function SettingsTab() {
       JSON.stringify(db, null, 2),
       'application/json'
     );
-    showToast('Full local database JSON backup downloaded.');
+    showToast('Local database JSON backup downloaded');
   };
 
   const handleRestoreJsonFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -107,10 +108,10 @@ export function SettingsTab() {
       const validated = validateBackupJson(text);
       restoreDatabase(validated);
       showToast(
-        `Restored backup with ${validated.workouts.length} workouts and ${validated.routines.length} routines.`
+        `Restored ${validated.workouts.length} workouts and ${validated.routines.length} routines`
       );
     } catch (err) {
-      setImportError(err instanceof Error ? err.message : 'Invalid JSON backup file.');
+      setImportError(err instanceof Error ? err.message : 'Invalid JSON backup file');
     }
     e.target.value = '';
   };
@@ -118,25 +119,22 @@ export function SettingsTab() {
   const { settings } = db;
 
   return (
-    <div className="space-y-6">
-      <div className="border-b border-[#000000] dark:border-[#FFFFFF] pb-3">
-        <p className="font-mono text-[10px] font-bold tracking-[0.12em] uppercase text-[#737373]">
-          05 // SYSTEM CONFIGURATION
-        </p>
-        <h2 className="mt-0.5 text-lg font-bold tracking-tight text-[#000000] dark:text-[#FFFFFF]">
+    <div className="max-w-[760px] space-y-10">
+      {/* Page Header */}
+      <header>
+        <h1 className="text-2xl font-semibold tracking-[-0.02em] text-[var(--ink-primary)]">
           Settings
-        </h2>
-        <p className="mt-0.5 font-mono text-[11px] uppercase tracking-[0.04em] text-[#737373]">
-          100% LOCAL ON-DEVICE STORAGE // ZERO ACCOUNTS // ZERO PAYWALLS
-        </p>
-      </div>
+        </h1>
+      </header>
 
       {statusMessage && (
         <div
           role="status"
-          className="hud-expand-enter flex items-center gap-2.5 border-2 border-[#000000] dark:border-[#FFFFFF] bg-[#000000] dark:bg-[#FFFFFF] px-4 py-3 font-mono text-xs font-bold text-[#FFFFFF] dark:text-[#000000]"
+          className="view-enter status-tick status-tick-sage flex items-center gap-3 rounded-lg border border-[var(--accent-sage-border)] bg-[var(--accent-sage-tint)] py-3 pl-4 pr-4 text-sm text-[var(--ink-primary)]"
         >
-          <Check className="h-4 w-4 shrink-0 stroke-[2.5]" />
+          <span className="flex h-5 w-5 shrink-0 items-center justify-center text-[var(--accent-sage)]">
+            <Check className="h-4 w-4 stroke-[1.5]" />
+          </span>
           <span>{statusMessage}</span>
         </div>
       )}
@@ -144,158 +142,142 @@ export function SettingsTab() {
       {importError && (
         <div
           role="alert"
-          className="hud-expand-enter border-2 border-[#000000] dark:border-[#FFFFFF] bg-[#FFFFFF] dark:bg-[#0A0A0A] px-4 py-3 font-mono text-xs font-bold text-[#000000] dark:text-[#FFFFFF]"
+          className="view-enter rounded-lg border border-[var(--accent-clay-border)] bg-[var(--accent-clay-tint)] px-4 py-3 text-sm text-[var(--accent-clay)]"
         >
-          [!] {importError}
+          {importError}
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Preferences Module */}
-        <section className="hud-frame border border-[#E5E5E5] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#0A0A0A] p-5 space-y-5">
-          <div className="border-b border-[#E5E5E5] dark:border-[#262626] pb-3">
-            <p className="font-mono text-[10px] font-bold tracking-[0.1em] uppercase text-[#737373]">
-              01 // CALIBRATION
-            </p>
-            <h3 className="mt-0.5 text-sm font-bold text-[#000000] dark:text-[#FFFFFF]">
-              Units &amp; Polarity
-            </h3>
+      {/* Section 1: Preferences (De-boxed on canvas with hairline dividers) */}
+      <section aria-labelledby="settings-preferences-heading" className="space-y-4">
+        <div className="border-b border-[var(--border-hairline)] pb-3">
+          <h2
+            id="settings-preferences-heading"
+            className="text-sm font-semibold text-[var(--ink-primary)]"
+          >
+            Preferences
+          </h2>
+        </div>
+
+        <div className="divide-y divide-[var(--border-hairline)]">
+          {/* Theme */}
+          <div className="flex min-h-[52px] flex-wrap items-center justify-between gap-4 py-3">
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-[var(--ink-primary)]">Theme</p>
+              <p className="mt-1 text-xs text-[var(--ink-secondary)]">
+                Switch between dark charcoal and light stone
+              </p>
+            </div>
+            <SegmentedControl
+              layoutId="settings-theme-seg"
+              ariaLabel="Theme"
+              value={settings.theme}
+              onChange={(theme) => updateSettings({ theme })}
+              options={[
+                {
+                  value: 'light',
+                  label: (
+                    <>
+                      <Sun className="h-4 w-4 stroke-[1.5]" />
+                      Light
+                    </>
+                  ),
+                },
+                {
+                  value: 'dark',
+                  label: (
+                    <>
+                      <Moon className="h-4 w-4 stroke-[1.5]" />
+                      Dark
+                    </>
+                  ),
+                },
+              ]}
+            />
           </div>
 
-          {/* Theme Polarity Toggle */}
-          <div className="flex items-center justify-between gap-4">
-            <div>
-              <p className="text-sm font-semibold text-[#000000] dark:text-[#FFFFFF]">Theme</p>
-              <p className="text-xs text-[#737373]">
-                Switch canvas polarity between light and dark monochrome
+          {/* Default Weight Unit */}
+          <div className="flex min-h-[52px] flex-wrap items-center justify-between gap-4 py-3">
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-[var(--ink-primary)]">
+                Default weight unit
+              </p>
+              <p className="mt-1 text-xs text-[var(--ink-secondary)]">
+                Can be overridden per exercise or per set while logging
               </p>
             </div>
-            <div className="flex items-center border border-[#000000] dark:border-[#FFFFFF] bg-[#FFFFFF] dark:bg-[#0A0A0A]">
-              <button
-                type="button"
-                onClick={() => updateSettings({ theme: 'light' })}
-                aria-pressed={settings.theme === 'light'}
-                className={`mech-press inline-flex min-h-[36px] items-center gap-1.5 px-3 font-mono text-[11px] font-bold uppercase ${
-                  settings.theme === 'light'
-                    ? 'bg-[#000000] dark:bg-[#FFFFFF] text-[#FFFFFF] dark:text-[#000000]'
-                    : 'text-[#737373] hover:text-[#000000] dark:hover:text-[#FFFFFF]'
-                }`}
-              >
-                <Sun className="h-3.5 w-3.5" />
-                Light
-              </button>
-              <button
-                type="button"
-                onClick={() => updateSettings({ theme: 'dark' })}
-                aria-pressed={settings.theme === 'dark'}
-                className={`mech-press inline-flex min-h-[36px] items-center gap-1.5 px-3 font-mono text-[11px] font-bold uppercase ${
-                  settings.theme === 'dark'
-                    ? 'bg-[#000000] dark:bg-[#FFFFFF] text-[#FFFFFF] dark:text-[#000000]'
-                    : 'text-[#737373] hover:text-[#000000] dark:hover:text-[#FFFFFF]'
-                }`}
-              >
-                <Moon className="h-3.5 w-3.5" />
-                Dark
-              </button>
-            </div>
+            <SegmentedControl
+              layoutId="settings-weight-seg"
+              ariaLabel="Default weight unit"
+              value={settings.weightUnit}
+              onChange={(weightUnit) => updateSettings({ weightUnit })}
+              options={[
+                { value: 'kg', label: <span className="font-mono">kg</span> },
+                { value: 'lbs', label: <span className="font-mono">lbs</span> },
+              ]}
+            />
           </div>
 
-          {/* Weight Unit */}
-          <div className="flex items-center justify-between gap-4 border-t border-[#E5E5E5] dark:border-[#262626] pt-4">
-            <div>
-              <p className="text-sm font-semibold text-[#000000] dark:text-[#FFFFFF]">Default Weight Unit</p>
-              <p className="text-xs text-[#737373]">
-                Override per-exercise or per-set anytime during logging
+          {/* Body Measurements */}
+          <div className="flex min-h-[52px] flex-wrap items-center justify-between gap-4 py-3">
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-[var(--ink-primary)]">
+                Body measurements
+              </p>
+              <p className="mt-1 text-xs text-[var(--ink-secondary)]">
+                Circumference metrics for chest, waist, and limbs
               </p>
             </div>
-            <div className="flex items-center border border-[#000000] dark:border-[#FFFFFF] bg-[#FFFFFF] dark:bg-[#0A0A0A]">
-              {(['kg', 'lbs'] as const).map((u) => (
-                <button
-                  key={u}
-                  type="button"
-                  onClick={() => updateSettings({ weightUnit: u })}
-                  aria-pressed={settings.weightUnit === u}
-                  className={`mech-press min-h-[36px] min-w-[50px] px-3 font-mono text-[11px] font-bold uppercase ${
-                    settings.weightUnit === u
-                      ? 'bg-[#000000] dark:bg-[#FFFFFF] text-[#FFFFFF] dark:text-[#000000]'
-                      : 'text-[#737373] hover:text-[#000000] dark:hover:text-[#FFFFFF]'
-                  }`}
-                >
-                  {u}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Body Measurement Unit */}
-          <div className="flex items-center justify-between gap-4 border-t border-[#E5E5E5] dark:border-[#262626] pt-4">
-            <div>
-              <p className="text-sm font-semibold text-[#000000] dark:text-[#FFFFFF]">
-                Body Measurements
-              </p>
-              <p className="text-xs text-[#737373]">
-                Circumference metrics (chest, waist, biceps)
-              </p>
-            </div>
-            <div className="flex items-center border border-[#000000] dark:border-[#FFFFFF] bg-[#FFFFFF] dark:bg-[#0A0A0A]">
-              {(['cm', 'in'] as const).map((u) => (
-                <button
-                  key={u}
-                  type="button"
-                  onClick={() => updateSettings({ measurementUnit: u })}
-                  aria-pressed={settings.measurementUnit === u}
-                  className={`mech-press min-h-[36px] min-w-[50px] px-3 font-mono text-[11px] font-bold uppercase ${
-                    settings.measurementUnit === u
-                      ? 'bg-[#000000] dark:bg-[#FFFFFF] text-[#FFFFFF] dark:text-[#000000]'
-                      : 'text-[#737373] hover:text-[#000000] dark:hover:text-[#FFFFFF]'
-                  }`}
-                >
-                  {u}
-                </button>
-              ))}
-            </div>
+            <SegmentedControl
+              layoutId="settings-measure-seg"
+              ariaLabel="Body measurement unit"
+              value={settings.measurementUnit}
+              onChange={(measurementUnit) => updateSettings({ measurementUnit })}
+              options={[
+                { value: 'cm', label: <span className="font-mono">cm</span> },
+                { value: 'in', label: <span className="font-mono">in</span> },
+              ]}
+            />
           </div>
 
           {/* Distance Unit */}
-          <div className="flex items-center justify-between gap-4 border-t border-[#E5E5E5] dark:border-[#262626] pt-4">
-            <div>
-              <p className="text-sm font-semibold text-[#000000] dark:text-[#FFFFFF]">Distance Unit</p>
-              <p className="text-xs text-[#737373]">Cardio and running tracking</p>
+          <div className="flex min-h-[52px] flex-wrap items-center justify-between gap-4 py-3">
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-[var(--ink-primary)]">Distance unit</p>
+              <p className="mt-1 text-xs text-[var(--ink-secondary)]">
+                Cardio and running distance
+              </p>
             </div>
-            <div className="flex items-center border border-[#000000] dark:border-[#FFFFFF] bg-[#FFFFFF] dark:bg-[#0A0A0A]">
-              {(['km', 'mi'] as const).map((u) => (
-                <button
-                  key={u}
-                  type="button"
-                  onClick={() => updateSettings({ distanceUnit: u })}
-                  aria-pressed={settings.distanceUnit === u}
-                  className={`mech-press min-h-[36px] min-w-[50px] px-3 font-mono text-[11px] font-bold uppercase ${
-                    settings.distanceUnit === u
-                      ? 'bg-[#000000] dark:bg-[#FFFFFF] text-[#FFFFFF] dark:text-[#000000]'
-                      : 'text-[#737373] hover:text-[#000000] dark:hover:text-[#FFFFFF]'
-                  }`}
-                >
-                  {u}
-                </button>
-              ))}
-            </div>
+            <SegmentedControl
+              layoutId="settings-distance-seg"
+              ariaLabel="Distance unit"
+              value={settings.distanceUnit}
+              onChange={(distanceUnit) => updateSettings({ distanceUnit })}
+              options={[
+                { value: 'km', label: <span className="font-mono">km</span> },
+                { value: 'mi', label: <span className="font-mono">mi</span> },
+              ]}
+            />
           </div>
 
           {/* Default Rest Timer */}
-          <div className="flex items-center justify-between gap-4 border-t border-[#E5E5E5] dark:border-[#262626] pt-4">
-            <div>
-              <label htmlFor="default-rest-select" className="text-sm font-semibold text-[#000000] dark:text-[#FFFFFF]">
-                Default Rest Timer
+          <div className="flex min-h-[52px] flex-wrap items-center justify-between gap-4 py-3">
+            <div className="min-w-0">
+              <label
+                htmlFor="default-rest-select"
+                className="text-sm font-medium text-[var(--ink-primary)]"
+              >
+                Default rest timer
               </label>
-              <p className="text-xs text-[#737373]">
-                Auto-starts after completing any set
+              <p className="mt-1 text-xs text-[var(--ink-secondary)]">
+                Starts automatically after completing a set
               </p>
             </div>
             <select
               id="default-rest-select"
               value={settings.defaultRestSeconds}
               onChange={(e) => updateSettings({ defaultRestSeconds: Number(e.target.value) })}
-              className="h-9 rounded-[2px] border border-[#000000] dark:border-[#262626] bg-[#F5F5F5] dark:bg-[#141414] px-3 font-mono text-xs font-bold text-[#000000] dark:text-[#FFFFFF]"
+              className="matte-input h-9 px-3 text-xs font-medium tabular-nums"
             >
               {[30, 45, 60, 75, 90, 120, 150, 180, 240, 300].map((sec) => (
                 <option key={sec} value={sec}>
@@ -305,217 +287,225 @@ export function SettingsTab() {
             </select>
           </div>
 
-          {/* Rest Sound Alert (Mechanical Square Switch) */}
-          <div className="flex items-center justify-between gap-4 border-t border-[#E5E5E5] dark:border-[#262626] pt-4">
-            <div>
-              <p className="text-sm font-semibold text-[#000000] dark:text-[#FFFFFF]">
-                Rest Timer Alert Chime
+          {/* Rest Timer Alert Chime */}
+          <div className="flex min-h-[52px] items-center justify-between gap-4 py-3">
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-[var(--ink-primary)]">
+                Rest timer chime
               </p>
-              <p className="text-xs text-[#737373]">
-                Play acoustic chime when rest countdown finishes
-              </p>
-            </div>
-            <button
-              type="button"
-              role="switch"
-              aria-checked={settings.restSoundEnabled}
-              onClick={() => updateSettings({ restSoundEnabled: !settings.restSoundEnabled })}
-              className={`mech-press relative inline-flex h-7 w-12 shrink-0 items-center rounded-[2px] border border-[#000000] dark:border-[#FFFFFF] ${
-                settings.restSoundEnabled
-                  ? 'bg-[#000000] dark:bg-[#FFFFFF]'
-                  : 'bg-[#FFFFFF] dark:bg-[#0A0A0A]'
-              }`}
-            >
-              <span
-                className={`inline-block h-4 w-4 transform transition-transform duration-150 ${
-                  settings.restSoundEnabled
-                    ? 'translate-x-6 bg-[#FFFFFF] dark:bg-[#000000]'
-                    : 'translate-x-1 bg-[#000000] dark:bg-[#FFFFFF]'
-                }`}
-              />
-            </button>
-          </div>
-        </section>
-
-        {/* Data Portability & Hevy Migration */}
-        <section className="space-y-5">
-          {/* Hevy CSV Importer */}
-          <div className="hud-frame border border-[#E5E5E5] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#0A0A0A] p-5 space-y-4">
-            <div className="border-b border-[#E5E5E5] dark:border-[#262626] pb-3">
-              <p className="font-mono text-[10px] font-bold tracking-[0.1em] uppercase text-[#737373]">
-                02 // MIGRATION
-              </p>
-              <h3 className="mt-0.5 text-sm font-bold text-[#000000] dark:text-[#FFFFFF]">
-                Hevy CSV Importer
-              </h3>
-              <p className="mt-1 text-xs leading-relaxed text-[#737373]">
-                Import standard Hevy workout export CSV files directly into local storage. Missing exercises are created automatically.
+              <p className="mt-1 text-xs text-[var(--ink-secondary)]">
+                Play a tone when rest countdown ends
               </p>
             </div>
-
-            <input
-              ref={csvInputRef}
-              type="file"
-              accept=".csv,text/csv"
-              onChange={handleHevyFileChange}
-              className="hidden"
+            <ToggleSwitch
+              checked={settings.restSoundEnabled}
+              onChange={(restSoundEnabled) => updateSettings({ restSoundEnabled })}
+              ariaLabel="Rest timer chime"
             />
-
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => csvInputRef.current?.click()}
-                className="mech-press inline-flex min-h-[42px] flex-1 items-center justify-center gap-2 rounded-[2px] border border-[#000000] dark:border-[#FFFFFF] bg-[#000000] dark:bg-[#FFFFFF] px-4 font-mono text-[11px] font-bold uppercase tracking-[0.06em] text-[#FFFFFF] dark:text-[#000000] hover:bg-[#262626] dark:hover:bg-[#E5E5E5] whitespace-nowrap"
-              >
-                <Upload className="h-3.5 w-3.5" />
-                Upload Hevy CSV
-              </button>
-              <button
-                type="button"
-                onClick={handleLoadSampleHevyCsv}
-                className="mech-press inline-flex min-h-[42px] items-center justify-center gap-2 rounded-[2px] border border-[#000000] dark:border-[#FFFFFF] bg-[#FFFFFF] dark:bg-[#0A0A0A] px-4 font-mono text-[11px] font-bold uppercase tracking-[0.06em] text-[#000000] dark:text-[#FFFFFF] hover:bg-[#000000] hover:text-[#FFFFFF] dark:hover:bg-[#FFFFFF] dark:hover:text-[#000000] whitespace-nowrap"
-              >
-                <FileSpreadsheet className="h-3.5 w-3.5" />
-                Test Sample CSV
-              </button>
-            </div>
-
-            {hevyPreview && (
-              <div className="hud-expand-enter border-2 border-[#000000] dark:border-[#FFFFFF] bg-[#F5F5F5] dark:bg-[#141414] p-4 space-y-3">
-                <div className="text-xs leading-relaxed text-[#000000] dark:text-[#FFFFFF]">
-                  <p className="font-mono text-[11px] font-bold uppercase tracking-[0.06em]">
-                    ■ READY TO IMPORT HEVY HISTORY
-                  </p>
-                  <p className="mt-1 font-mono text-xs tabular-nums text-[#737373]">
-                    {hevyPreview.workouts.length} {hevyPreview.workouts.length === 1 ? 'workout' : 'workouts'} //{' '}
-                    {hevyPreview.totalSets} sets // {hevyPreview.newExercises.length} new custom{' '}
-                    {hevyPreview.newExercises.length === 1 ? 'exercise' : 'exercises'}
-                  </p>
-                  {hevyPreview.newExercises.length > 0 && (
-                    <p className="mt-1 font-mono text-[11px] text-[#000000] dark:text-[#FFFFFF]">
-                      NEW: {hevyPreview.newExercises.map((e) => e.name).join(', ')}
-                    </p>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={confirmHevyImport}
-                    className="mech-press min-h-[38px] rounded-[2px] bg-[#000000] dark:bg-[#FFFFFF] px-4 font-mono text-[11px] font-bold uppercase tracking-[0.06em] text-[#FFFFFF] dark:text-[#000000]"
-                  >
-                    Confirm Import
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setHevyPreview(null)}
-                    className="mech-press min-h-[38px] rounded-[2px] border border-[#D4D4D4] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#0A0A0A] px-3 font-mono text-[11px] font-bold uppercase tracking-[0.06em] text-[#000000] dark:text-[#FFFFFF]"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            )}
           </div>
+        </div>
+      </section>
 
-          {/* Backup & Export */}
-          <div className="hud-frame border border-[#E5E5E5] dark:border-[#262626] bg-[#FFFFFF] dark:bg-[#0A0A0A] p-5 space-y-4">
-            <div className="border-b border-[#E5E5E5] dark:border-[#262626] pb-3">
-              <p className="font-mono text-[10px] font-bold tracking-[0.1em] uppercase text-[#737373]">
-                03 // PORTABILITY
+      {/* Section 2: Hevy CSV Import */}
+      <section aria-labelledby="settings-hevy-heading" className="space-y-4">
+        <div className="border-b border-[var(--border-hairline)] pb-3">
+          <h2
+            id="settings-hevy-heading"
+            className="text-sm font-semibold text-[var(--ink-primary)]"
+          >
+            Hevy CSV import
+          </h2>
+          <p className="mt-1 text-xs text-[var(--ink-secondary)]">
+            Import Hevy workout export files into local storage with automatic exercise matching
+          </p>
+        </div>
+
+        <input
+          ref={csvInputRef}
+          type="file"
+          accept=".csv,text/csv"
+          onChange={handleHevyFileChange}
+          className="hidden"
+        />
+
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => csvInputRef.current?.click()}
+            className="calm-press btn-primary inline-flex h-10 items-center gap-2 px-4 text-sm font-medium whitespace-nowrap"
+          >
+            <span className="flex h-5 w-5 items-center justify-center">
+              <Upload className="h-4 w-4 stroke-[1.5]" />
+            </span>
+            Upload Hevy CSV
+          </button>
+          <button
+            type="button"
+            onClick={handleLoadSampleHevyCsv}
+            className="calm-press btn-secondary inline-flex h-10 items-center gap-2 px-4 text-sm font-medium whitespace-nowrap"
+          >
+            <span className="flex h-5 w-5 items-center justify-center text-[var(--ink-secondary)]">
+              <FileSpreadsheet className="h-4 w-4 stroke-[1.5]" />
+            </span>
+            Load sample
+          </button>
+        </div>
+
+        {hevyPreview && (
+          <div className="view-enter matte-surface p-4 space-y-3">
+            <div className="text-sm text-[var(--ink-primary)]">
+              <p className="font-medium">Ready to import</p>
+              <p className="mt-1 font-mono text-xs tabular-nums text-[var(--ink-secondary)]">
+                {hevyPreview.workouts.length}{' '}
+                {hevyPreview.workouts.length === 1 ? 'workout' : 'workouts'} ·{' '}
+                {hevyPreview.totalSets} sets · {hevyPreview.newExercises.length} new{' '}
+                {hevyPreview.newExercises.length === 1 ? 'exercise' : 'exercises'}
               </p>
-              <h3 className="mt-0.5 text-sm font-bold text-[#000000] dark:text-[#FFFFFF]">
-                Backup &amp; Export
-              </h3>
-              <p className="mt-0.5 text-xs text-[#737373]">
-                Move your entire local database to a new device or export spreadsheets anytime.
-              </p>
+              {hevyPreview.newExercises.length > 0 && (
+                <p className="mt-2 text-xs text-[var(--ink-secondary)]">
+                  New exercises: {hevyPreview.newExercises.map((e) => e.name).join(', ')}
+                </p>
+              )}
             </div>
-
-            <input
-              ref={jsonInputRef}
-              type="file"
-              accept=".json,application/json"
-              onChange={handleRestoreJsonFile}
-              className="hidden"
-            />
-
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
-                onClick={handleExportJson}
-                className="mech-press inline-flex min-h-[42px] items-center justify-center gap-2 rounded-[2px] border border-[#000000] dark:border-[#FFFFFF] bg-[#FFFFFF] dark:bg-[#0A0A0A] px-3 font-mono text-[11px] font-bold uppercase tracking-[0.04em] text-[#000000] dark:text-[#FFFFFF] hover:bg-[#000000] hover:text-[#FFFFFF] dark:hover:bg-[#FFFFFF] dark:hover:text-[#000000]"
+                onClick={confirmHevyImport}
+                className="calm-press btn-primary h-9 px-4 text-sm font-medium whitespace-nowrap"
               >
-                <Download className="h-3.5 w-3.5" />
-                JSON Backup
+                Confirm import
               </button>
               <button
                 type="button"
-                onClick={() => jsonInputRef.current?.click()}
-                className="mech-press inline-flex min-h-[42px] items-center justify-center gap-2 rounded-[2px] border border-[#000000] dark:border-[#FFFFFF] bg-[#FFFFFF] dark:bg-[#0A0A0A] px-3 font-mono text-[11px] font-bold uppercase tracking-[0.04em] text-[#000000] dark:text-[#FFFFFF] hover:bg-[#000000] hover:text-[#FFFFFF] dark:hover:bg-[#FFFFFF] dark:hover:text-[#000000]"
+                onClick={() => setHevyPreview(null)}
+                className="calm-press btn-secondary h-9 px-4 text-sm font-medium whitespace-nowrap"
               >
-                <Upload className="h-3.5 w-3.5" />
-                Restore JSON
+                Cancel
               </button>
-              <button
-                type="button"
-                onClick={handleExportCsv}
-                className="mech-press inline-flex min-h-[42px] items-center justify-center gap-2 rounded-[2px] border border-[#000000] dark:border-[#FFFFFF] bg-[#FFFFFF] dark:bg-[#0A0A0A] px-3 font-mono text-[11px] font-bold uppercase tracking-[0.04em] text-[#000000] dark:text-[#FFFFFF] hover:bg-[#000000] hover:text-[#FFFFFF] dark:hover:bg-[#FFFFFF] dark:hover:text-[#000000]"
-              >
-                <FileSpreadsheet className="h-3.5 w-3.5" />
-                Export CSV
-              </button>
-            </div>
-
-            <div className="border-t border-[#E5E5E5] dark:border-[#262626] pt-4">
-              <div className="hud-hatch-strong mb-3 h-1.5 w-full" aria-hidden="true" />
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setConfirmResetOpen(true)}
-                  className="mech-press inline-flex min-h-[38px] items-center gap-1.5 rounded-[2px] border border-[#D4D4D4] dark:border-[#262626] px-3 font-mono text-[11px] font-bold uppercase tracking-[0.04em] text-[#737373] hover:border-[#000000] dark:hover:border-[#FFFFFF] hover:text-[#000000] dark:hover:text-[#FFFFFF]"
-                >
-                  <RotateCcw className="h-3.5 w-3.5" />
-                  Reset Demo Data
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setConfirmClearOpen(true)}
-                  className="mech-press inline-flex min-h-[38px] items-center gap-1.5 rounded-[2px] border border-[#000000] dark:border-[#FFFFFF] px-3 font-mono text-[11px] font-bold uppercase tracking-[0.04em] text-[#000000] dark:text-[#FFFFFF] hover:bg-[#000000] hover:text-[#FFFFFF] dark:hover:bg-[#FFFFFF] dark:hover:text-[#000000]"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                  Start Fresh (Clear All)
-                </button>
-              </div>
             </div>
           </div>
-        </section>
-      </div>
+        )}
+      </section>
+
+      {/* Section 3: Backup and Export */}
+      <section aria-labelledby="settings-backup-heading" className="space-y-4">
+        <div className="border-b border-[var(--border-hairline)] pb-3">
+          <h2
+            id="settings-backup-heading"
+            className="text-sm font-semibold text-[var(--ink-primary)]"
+          >
+            Backup and export
+          </h2>
+          <p className="mt-1 text-xs text-[var(--ink-secondary)]">
+            Transfer local data between devices or export workout logs as CSV
+          </p>
+        </div>
+
+        <input
+          ref={jsonInputRef}
+          type="file"
+          accept=".json,application/json"
+          onChange={handleRestoreJsonFile}
+          className="hidden"
+        />
+
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={handleExportJson}
+            className="calm-press btn-secondary inline-flex h-10 items-center gap-2 px-4 text-sm font-medium whitespace-nowrap"
+          >
+            <span className="flex h-5 w-5 items-center justify-center text-[var(--ink-secondary)]">
+              <Download className="h-4 w-4 stroke-[1.5]" />
+            </span>
+            Backup JSON
+          </button>
+          <button
+            type="button"
+            onClick={() => jsonInputRef.current?.click()}
+            className="calm-press btn-secondary inline-flex h-10 items-center gap-2 px-4 text-sm font-medium whitespace-nowrap"
+          >
+            <span className="flex h-5 w-5 items-center justify-center text-[var(--ink-secondary)]">
+              <Upload className="h-4 w-4 stroke-[1.5]" />
+            </span>
+            Restore JSON
+          </button>
+          <button
+            type="button"
+            onClick={handleExportCsv}
+            className="calm-press btn-secondary inline-flex h-10 items-center gap-2 px-4 text-sm font-medium whitespace-nowrap"
+          >
+            <span className="flex h-5 w-5 items-center justify-center text-[var(--ink-secondary)]">
+              <FileSpreadsheet className="h-4 w-4 stroke-[1.5]" />
+            </span>
+            Export CSV
+          </button>
+        </div>
+      </section>
+
+      {/* Section 4: Data Management */}
+      <section aria-labelledby="settings-data-heading" className="space-y-4">
+        <div className="border-b border-[var(--border-hairline)] pb-3">
+          <h2
+            id="settings-data-heading"
+            className="text-sm font-semibold text-[var(--ink-primary)]"
+          >
+            Data management
+          </h2>
+          <p className="mt-1 text-xs text-[var(--ink-secondary)]">
+            Restore sample workouts or clear all stored local records
+          </p>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setConfirmResetOpen(true)}
+            className="calm-press btn-secondary inline-flex h-10 items-center gap-2 px-4 text-sm font-medium whitespace-nowrap"
+          >
+            <span className="flex h-5 w-5 items-center justify-center text-[var(--ink-secondary)]">
+              <RotateCcw className="h-4 w-4 stroke-[1.5]" />
+            </span>
+            Reset demo data
+          </button>
+          <button
+            type="button"
+            onClick={() => setConfirmClearOpen(true)}
+            className="calm-press btn-danger inline-flex h-10 items-center gap-2 px-4 text-sm font-medium whitespace-nowrap"
+          >
+            <span className="flex h-5 w-5 items-center justify-center">
+              <Trash2 className="h-4 w-4 stroke-[1.5]" />
+            </span>
+            Clear all data
+          </button>
+        </div>
+      </section>
 
       <ConfirmDialog
         open={confirmResetOpen}
-        title="Reset to sample data?"
-        description="This replaces your local workout logs and routines with the default demo training block."
-        confirmLabel="Reset Data"
+        title="Reset to sample data"
+        description="This replaces local workout logs and routines with the default training block"
+        confirmLabel="Reset demo data"
         destructive
         onCancel={() => setConfirmResetOpen(false)}
         onConfirm={() => {
           resetToSampleData();
           setConfirmResetOpen(false);
-          showToast('Sample training data restored.');
+          showToast('Sample training data restored');
         }}
       />
 
       <ConfirmDialog
         open={confirmClearOpen}
-        title="Clear all workout data?"
-        description="This removes all routines, folders, workout logs, custom exercises, and body measurements, leaving only the 128 built-in exercises."
-        confirmLabel="Clear Everything"
+        title="Clear all data"
+        description="This removes all routines, folders, workout logs, custom exercises, and body measurements, keeping built-in exercises intact"
+        confirmLabel="Clear all data"
         destructive
         onCancel={() => setConfirmClearOpen(false)}
         onConfirm={() => {
           clearAllData();
           setConfirmClearOpen(false);
-          showToast('Local database cleared. Fresh start ready.');
+          showToast('Local database cleared');
         }}
       />
     </div>
